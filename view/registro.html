@@ -1,0 +1,521 @@
+<style>   
+  .icono {
+    width: 32px;
+    height: 32px;
+    max-width: 60%;
+  }
+
+  /* Estilo adicional para texto */
+  .texto-icono {
+    font-size: 10px;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  /* Tamaño para pantallas grandes (PC) */
+  @media screen and (min-width: 768px) {
+    .icono {
+      width: 48px;
+      height: 48px;
+    }
+
+    .texto-icono {
+      font-size: 14px;
+      font-family: 'Poppins', sans-serif;
+    }
+  }
+</style>
+<div>
+  <div class="container-fluid"> <!--deja un espacio minimo del borde de la pantalla-->
+    <h3></h3>
+    <!-- <div class="output"> </div> -->
+    <form id="formulario" onsubmit="nsRegistro.procesarFormulario(event,this)">
+      <div class="container-fluid p-0 m-0">
+        <div class="row justify-content-center">
+          <div class="col-12 col-sm-12 col-md-12 col-lg-6 col-xl-5">
+            <div class="card shadow border-0">
+              <div class="card-header bg-dark text-white d-flex align-items-center" style="height: 3rem;">
+                <h5 class="card-title mb-0 fw-bold">Registro de Asistencia</h5>
+              </div>
+              <div class="card-body">
+                <div class="text-center mb-4">
+                  <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#staticBackdrop" id="opencamera">
+                    <i class="bi bi-camera-fill"></i>
+                  </button>
+                </div>
+
+                <div class="mb-3">
+                  <label for="codnomina" class="form-label">Código Nómina</label>
+                  <input type="number" class="form-control" id="codnomina" name="codnomina">
+                  <span id="namePromotor" class="form-text text-muted"></span>
+                </div>
+
+                <div class="mb-3">
+                  <div class="container text-center">
+                    <div class="row">
+                      <div class="col-3">
+                       <img id="icon-e1" class="icono" src="/asist/assets/question.png" alt="E1">      
+                      </div>
+                      <div class="col-3">
+                        <img id="icon-s1" class="icono" src="/asist/assets/question.png" alt="S1">     
+                      </div>
+                      <div class="col-3">
+                        <img id="icon-e2" class="icono" src="/asist/assets/question.png" alt="E2">      
+                      </div>
+                      <div class="col-3">
+                        <img id="icon-s2" class="icono" src="/asist/assets/question.png" alt="S2">
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-3 texto-icono">
+                        ENTRADA1
+                      </div>
+                      <div class="col-3 texto-icono">
+                        SALIDA1
+                      </div>
+                      <div class="col-3 texto-icono">
+                        ENTRADA2
+                      </div>
+                      <div class="col-3 texto-icono">
+                        SALIDA2
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div id="he1" class="col-3 texto-icono"></div>
+                      <div id="hs1" class="col-3 texto-icono"></div>
+                      <div id="he2" class="col-3 texto-icono"></div>
+                      <div id="hs2" class="col-3 texto-icono"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mb-3" style="display: none;">
+                  <label for="fecha" class="form-label">Fecha</label>
+                  <input type="text" class="form-control" id="fecha" name="fecha" readonly>
+                </div>
+
+                <div class="mb-3" style="display: none;">
+                  <label for="hora" class="form-label">Hora</label>
+                  <input type="text" class="form-control" id="hora" name="hora" readonly>
+                </div>
+
+                <div class="row mb-3" style="display: none;">
+                  <div class="col">
+                    <input type="radio" class="btn-check" name="tiporegistro" id="rbtEntrada" value="ENTRADA" autocomplete="off" checked>
+                    <label class="btn btn-outline-primary form-control" for="rbtEntrada">Entrada</label>
+                  </div>
+                  <div class="col">
+                    <input type="radio" class="btn-check" name="tiporegistro" id="rbtSalida" value="SALIDA" autocomplete="off">
+                    <label class="btn btn-outline-primary form-control" for="rbtSalida">Salida</label>
+                  </div>
+                </div>
+
+                <div class="mb-3" style="display: none;">
+                  <label for="ubicacion" class="form-label">Ubicación</label>
+                  <input type="text" class="form-control" id="coordenadas" name="coordenadas" readonly>
+                  <!-- Campos ocultos para la imagen y mapa -->
+                  <input type="hidden" id="pathIMG" name="pathIMG">
+                  <input type="hidden" id="IDImg" name="IDImg">
+                  <input type="hidden" id="mapa" name="mapa">
+                </div> 
+              </div>              
+              <div class="card-footer d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-fill" id="frmSubmit">Enviar</button>
+                <button type="button" class="btn btn-secondary flex-fill" id="limpiar">Nuevo</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>      
+    </form>
+  </div>
+</div>
+<script>  
+var nsRegistro=(function(){ 
+    /******************************************************************************************************/
+    var icono1 = "/asist/assets/time-1.png"; //icono verde marco a tiempo
+    var icono2 = "/asist/assets/time-2.png"; //icono naranja marco tarde     
+    var icono3 = "/asist/assets/time-3.png"; //icono rojo marco tarde  tarde   
+    var iconopregunta = "/asist/assets/question.png"; // Por defecto: no marcó icono pregunta
+    var dataForm = null;
+    /****************************************Obteniendo la ubicación actual********************************/
+    let latitude='';
+    let longitude='';
+    let options = {
+      enableHighAccuracy: true,
+      timeout: 30000,
+      maximumAge: 27000,
+    };
+
+    function success(pos) {//log("Tu ubicación actual:");.log(`Latitud : ${crd.latitude}`);log(`+- ${crd.accuracy} metros.`);
+      let crd = pos.coords;
+      latitude = crd.latitude;
+      longitude = crd.longitude;
+      document.getElementById("coordenadas").value= latitude+","+longitude;
+      document.getElementById("mapa").value= "https://www.google.com/maps?q=" + latitude+","+longitude;
+      saveImage(); 
+    }
+
+    function error(err) {
+      if(err.code == 1) {
+        alertSMS("Error: El acceso a la ubicación esta deshabilitado!");
+        latitude='';longitude='';
+      } else if( err.code == 2) {    
+        alertSMS("Error: No se pudo calcular la ubicación!");  
+        latitude='';longitude='';
+      }
+      //console.warn(`ERROR(${err.code}): ${err.message}`);
+    }
+    
+    async function getLocation(){ //función para obtener ubicación
+      if(navigator.geolocation){
+        try {
+          const ret = await navigator.geolocation.getCurrentPosition(success, error, options); // get ubicacion          
+        }catch (e) {
+          errorMsgElement.innerHTML = `navigator.getUserMedia error:${e.toString()}`;
+        }
+      }else{
+        alertSMS("Lo sentimos, el navegador no soporta la geolocalización!"); 
+      }
+    }
+    
+    /****************************************Definiación de variables globales**************************************/   
+    //var arrayGlobal=[];//arreglo de promotores
+    var banPromotor=0;//variable para determinar si el promotor fue encontrado    
+    let submitDesdeBoton = false;    
+    let canvas = null;
+    /******************************************************************************************************/
+    /****************************************Definición de eventos HTML***********************************/  
+    document.querySelectorAll('input[type=number]').forEach( node => node.addEventListener('keypress', e => {
+      if(e.keyCode == 13) {e.preventDefault();            
+        getPromotor();
+      }
+    }));//Se captura la tecla enter para evitar el envio del formulario       
+   
+    // Detectar si el botón fue presionado con mouse
+    document.getElementById("frmSubmit").addEventListener("mousedown", () => {
+      submitDesdeBoton = true;
+    });
+    
+    document.getElementById("codnomina").addEventListener("change", async () => {       
+        try {
+            const exito = await getPromotor();
+           
+            if (exito) { 
+                banPromotor=1; //Se encontro un promotor              
+                if (submitDesdeBoton) {
+
+                  submitDesdeBoton = false; // limpiar bandera
+                  document.getElementById("formulario").dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+
+                }
+            }            
+        } catch (e) {
+            console.error("Error al procesar el formulario:", e);
+            alertSMS("Ocurrió un error inesperado al procesar el formulario.");
+        }
+    });
+
+    document.getElementById('limpiar').addEventListener('click', function() {
+        clean(1);
+    });
+    // Se pasa 1 para saber que es evento de boton 
+
+    function clean( src ){//resetea el contador
+      document.getElementById("namePromotor").textContent = "";
+      document.getElementById("formulario").reset();
+      banPromotor = 0; nsModal.numClic=0;
+      let canvas = nsRegistro.getCanvas();
+      var context = canvas.getContext('2d');      
+      context.clearRect(0, 0, canvas.width, canvas.height);
+
+      if( src === 1 ){
+        asignarIcono("e1", "");
+        asignarIcono("s1", "");
+        asignarIcono("e2", "");
+        asignarIcono("s2", "");
+        asignarHora("he1", "");
+        asignarHora("hs1", "");
+        asignarHora("he2", "");
+        asignarHora("hs2", "");
+      }
+
+    }
+    /******************************************************************************************************/
+    //Código nuestro   
+
+    async function procesarFormulario(event, formulario) {
+      event.preventDefault();
+      
+      const boton = document.getElementById("frmSubmit");      
+      boton.classList.add("disabled");
+      boton.disabled = true;
+
+      let codnomina = document.getElementById("codnomina").value;
+
+      if (codnomina === "") { 
+        alertSMS("Por favor diligencie su código de nómina");
+        boton.classList.remove("disabled");      
+        boton.disabled = false;
+        return;
+      }
+
+      try { 
+        if (banPromotor == 0) {
+          const exito = await getPromotor();
+
+          if (exito) {
+            setDate();
+            getLocation();
+          }
+        } else {
+          setDate();
+          getLocation();
+        }
+        boton.classList.remove("disabled");      
+        boton.disabled = false; 
+      } catch (e) {
+        boton.classList.remove("disabled");      
+        boton.disabled = false;
+        console.error("Error al procesar el formulario:", e);
+        alertSMS("Ocurrió un error inesperado al procesar el formulario.");
+      }
+    }
+
+    async function getPromotor() {  
+      crearLoader();
+      const codnomina = document.getElementById("codnomina").value;
+      const promotor = arrayGlobal.filter(elemento => elemento[0] == codnomina);
+
+      if (promotor.length > 0) {
+        banPromotor = 1;
+        document.getElementById("namePromotor").innerHTML = promotor[0][1].toString().toUpperCase();
+
+        try {
+          const response = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({
+              action: "obtenerMarcacionesDelDia",
+              codnomina: codnomina
+            })
+          });
+
+          const result = await response.json();
+
+          if (result.status === "success") {
+            const marcaciones = result.data;
+            asignarIcono("e1", marcaciones.E1.estado);
+            asignarIcono("s1", marcaciones.S1.estado);
+            asignarIcono("e2", marcaciones.E2.estado);
+            asignarIcono("s2", marcaciones.S2.estado);
+            asignarHora("he1", marcaciones.E1.hora);
+            asignarHora("hs1", marcaciones.S1.hora);
+            asignarHora("he2", marcaciones.E2.hora);
+            asignarHora("hs2", marcaciones.S2.hora);
+            eliminarLoader();
+            return true;
+          } else { eliminarLoader();
+            throw new Error(result.mensaje || "Error al obtener marcaciones.");
+          }
+
+        } catch (error) {
+          console.error("Error al obtener marcaciones:", error.message);
+          alertSMS("Error al obtener marcaciones, vuelva a intentarlo");
+          eliminarLoader();
+          return false;
+        }
+        eliminarLoader();
+      } else {
+        banPromotor = 0;
+        document.getElementById("namePromotor").innerHTML = "";
+        document.getElementById("fecha").value = "";
+        document.getElementById("hora").value = "";
+        document.getElementById("coordenadas").value = "";
+        document.getElementById("pathIMG").value = "";
+        document.getElementById("mapa").value = "";
+        asignarIcono("e1", "");
+        asignarIcono("s1", "");
+        asignarIcono("e2", "");
+        asignarIcono("s2", "");
+        asignarHora("he1", "");
+        asignarHora("hs1", "");
+        asignarHora("he2", "");
+        asignarHora("hs2", "");
+        alertSMS("El código de promotor no existe en la base de datos");
+        eliminarLoader();
+        return false;
+      }
+    }
+
+
+    function setDate(){ 
+      let date = new Date();      
+      let hora = date.toLocaleTimeString("es-CO", { hour12: false });  
+      let fecha = date.toLocaleDateString('es-CO');      
+      document.getElementById("fecha").value = fecha; //day+'-'+month+'-'+year;        
+      document.getElementById("hora").value = hora ;//hours+':'+minutes;    
+    }
+
+    /*************************************Guardar Imagen***************************************************/
+    function enviarFormularioConFetch() {
+      fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+        },
+        body: new URLSearchParams({
+          action: 'escribirDatosEnSheets', // Puedes cambiarlo según cómo lo procese tu backend
+          ...dataForm
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        escribioHoja(data);
+      })
+      .catch(error => {
+        errorescrituraHoja(error);
+      });
+    }
+
+    function successFull(data){ //console.log("devuelta:" + data ); //console.log(data.url); 
+      document.getElementById("pathIMG").value = data.url;
+      document.getElementById("IDImg").value = data.fileID;    
+      dataForm = Object.fromEntries(new FormData(formulario).entries());   
+      enviarFormularioConFetch(dataForm); 
+    }
+
+    function errorUpload(data){ 
+      eliminarLoader();
+      document.getElementById("fecha").value = "";
+      document.getElementById("hora").value = "";//hours+':'+minutes; 
+      document.getElementById("coordenadas").value= "";
+      document.getElementById("mapa").value= "";
+      latitude='';
+      longitude='';
+    }
+    
+    function saveImage(){ 
+      if( nsModal.numClic > 0 ){
+        crearLoader(); 
+        let canvas = nsRegistro.getCanvas();
+        //let dataURi = canvas.toDataURL('image/png');
+        let dataURi = canvas.toDataURL('image/jpeg', 0.6);
+        let idImg = document.getElementById("codnomina").value + "-" + document.getElementById("fecha").value;  
+        subirImagen(dataURi,idImg,folderPathIMG);  
+      }
+      else{
+        alertSMS("La fotografía es necesaria");
+      }        
+    }//Fin función saveImage   
+
+    async function subirImagen(dataURI, idImg, folderPathIMG) {
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+          },
+          body: new URLSearchParams({
+            action: 'doUpload',
+            data: dataURI,
+            idImg: idImg,
+            folderPathIMG: folderPathIMG
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.status) { 
+          successFull(result);  // llama tu función de éxito          
+        } else {
+          errorUpload("No se pudo subir la imagen"); //         
+        }
+
+      } catch (error) {
+        console.error("Error en fetch:", error);
+        errorUpload(error.message || "Error en la conexión");
+      }
+    }
+
+
+    function escribioHoja(datos) {
+      const { E1, S1, E2, S2, sms, existeMarcacion } = datos;
+      console.log("E1:", E1.estado, "Hora:", E1.hora);
+      console.log("S1:", S1.estado, "Hora:", S1.hora);
+      console.log("E2:", E2.estado, "Hora:", E2.hora);
+      console.log("S2:", S2.estado, "Hora:", S2.hora);
+      console.log("sms:", sms);
+      console.log("existeMarcacion:", existeMarcacion); 
+      // Asignar íconos usando estado
+      asignarIcono("e1", E1.estado);
+      asignarIcono("s1", S1.estado);
+      asignarIcono("e2", E2.estado);
+      asignarIcono("s2", S2.estado);
+
+      asignarHora("he1", E1.hora);
+      asignarHora("hs1", S1.hora);
+      asignarHora("he2", E2.hora);
+      asignarHora("hs2", S2.hora);
+
+      eliminarLoader();
+      clean( 0 );
+
+      if (sms !== "")
+        alertSMS( sms );
+      else if (existeMarcacion)
+        alertSMS("No se puede duplicar una entrada o salida");
+      else
+        alertSMS("Registro creado con éxito");
+    }
+
+    function asignarHora(id, hora) {
+      const div = document.getElementById(id);
+      if (div) {
+        div.innerText = hora || ""; // Asigna la hora o deja vacío si no hay hora
+      }
+    }
+
+    function asignarIcono(idMarcacion, estado) {
+      const img = document.getElementById(`icon-${idMarcacion}`);      
+      
+      let icono="";
+
+      if ( estado.endsWith("AT") || estado.endsWith("OT") || estado.endsWith("BT") ) {        
+        if (estado.startsWith("E1") || estado.startsWith("E2")) {
+          icono = estado.endsWith("AT") ? icono1 : icono2;
+        } 
+        else if (estado.startsWith("S1") || estado.startsWith("S2") ) {
+          icono = estado.endsWith("OT") ? icono1 : icono2;
+        }         
+      }else{
+        icono =iconopregunta;
+      }  
+
+      img.src = `${icono}`;
+      img.alt = estado || "Sin marcación";
+    }
+
+    function errorescrituraHoja(){
+      eliminarLoader();
+      alertSMS("No se pudieron registrar los datos vuelva a intentar"); 
+    }
+    
+    /******************************************************************************************************/    
+    
+     function setCanvas(c) {
+      canvas = c;
+     }
+
+     function getCanvas() {
+        return canvas;
+     }
+
+      // Expone las funciones públicas del módulo
+    return {
+        procesarFormulario,
+        setCanvas,
+        getCanvas
+    };
+    
+  })();
+  </script>
