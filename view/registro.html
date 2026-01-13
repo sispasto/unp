@@ -281,7 +281,7 @@ var nsRegistro=(function(){
       }
     }
 
-    async function getPromotor() {  
+    /*async function getPromotor() {  
       crearLoader();
       const codnomina = document.getElementById("codnomina").value;
       const promotor = arrayGlobal.filter(elemento => elemento[0] == codnomina);
@@ -345,7 +345,48 @@ var nsRegistro=(function(){
         eliminarLoader();
         return false;
       }
+    }*/
+   /********************************************************************************************************/
+    async function getPromotor() {
+      crearLoader();
+
+      const codnomina = document.getElementById("codnomina").value;
+
+      if (!codnomina) {
+        alertSMS("Ingrese el código");
+        eliminarLoader();
+        return false;
+      }
+
+      const { data, error } = await supabase
+        .from("pempleados")
+        .select("id, nombre, estado")
+        .eq("id", codnomina)
+        .single();
+
+      if (error || !data) {
+        alertSMS("El código no existe");
+        limpiarPantalla();
+        eliminarLoader();
+        return false;
+      }
+
+      if (!data.estado) {
+        alertSMS("Empleado inactivo");
+        limpiarPantalla();
+        eliminarLoader();
+        return false;
+      }
+
+      banPromotor = 1;
+      document.getElementById("namePromotor").innerHTML =
+        data.nombre.toUpperCase();
+
+      eliminarLoader();
+      return true;
     }
+
+   /********************************************************************************************************/
 
 
     function setDate(){ 
