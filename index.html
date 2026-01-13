@@ -21,10 +21,24 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
           integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
           crossorigin="anonymous"></script>
+  
+  <!--Supabase-->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>  
 
   <!-- Tu JS -->
   <script type="module" src="componentes/index.js"></script>
   <link rel="manifest" href="manifest.json">
+  
+  <script> 
+    const supabase = window.supabase.createClient(
+      "https://pmbxyfketmuzocepllvf.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtYnh5ZmtldG11em9jZXBsbHZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3ODE4NjUsImV4cCI6MjA3MzM1Nzg2NX0.oh9zssayvCPp-jcCohQugTx28Ds2Ts-y7Tbp-pgX1XE"
+    );
+
+    alert(supabase);
+
+  </script>
+
 </head>
 
   <body>

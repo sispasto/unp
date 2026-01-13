@@ -22,7 +22,6 @@ function getHome() {
   componente.setAttribute('container', '#App'); // <-- aquí pasas el parámetro
   componente.versionApp = versionApp; // <-- Aquí se pasa la versión antes de renderizar
   main.appendChild(componente);
-
   /******************************************************** */
 }
 
