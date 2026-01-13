@@ -49,45 +49,6 @@
                   <span id="namePromotor" class="form-text text-muted"></span>
                 </div>
 
-                <div class="mb-3">
-                  <div class="container text-center">
-                    <div class="row">
-                      <div class="col-3">
-                       <img id="icon-e1" class="icono" src="/unp/assets/question.png" alt="E1">      
-                      </div>
-                      <div class="col-3">
-                        <img id="icon-s1" class="icono" src="/unp/assets/question.png" alt="S1">     
-                      </div>
-                      <div class="col-3">
-                        <img id="icon-e2" class="icono" src="/unp/assets/question.png" alt="E2">      
-                      </div>
-                      <div class="col-3">
-                        <img id="icon-s2" class="icono" src="/unp/assets/question.png" alt="S2">
-                      </div>
-                    </div>
-                    <div class="row">
-                      <div class="col-3 texto-icono">
-                        ENTRADA1
-                      </div>
-                      <div class="col-3 texto-icono">
-                        SALIDA1
-                      </div>
-                      <div class="col-3 texto-icono">
-                        ENTRADA2
-                      </div>
-                      <div class="col-3 texto-icono">
-                        SALIDA2
-                      </div>
-                    </div>
-                    <div class="row">
-                      <div id="he1" class="col-3 texto-icono"></div>
-                      <div id="hs1" class="col-3 texto-icono"></div>
-                      <div id="he2" class="col-3 texto-icono"></div>
-                      <div id="hs2" class="col-3 texto-icono"></div>
-                    </div>
-                  </div>
-                </div>
-
                 <div class="mb-3" style="display: none;">
                   <label for="fecha" class="form-label">Fecha</label>
                   <input type="text" class="form-control" id="fecha" name="fecha" readonly>
@@ -131,11 +92,7 @@
 </div>
 <script>  
 var nsRegistro=(function(){ 
-    /******************************************************************************************************/
-    var icono1 = "/unp/assets/time-1.png"; //icono verde marco a tiempo
-    var icono2 = "/unp/assets/time-2.png"; //icono naranja marco tarde     
-    var icono3 = "/unp/assets/time-3.png"; //icono rojo marco tarde  tarde   
-    var iconopregunta = "/unp/assets/question.png"; // Por defecto: no marcó icono pregunta
+    /******************************************************************************************************/ 
     var dataForm = null;
     /****************************************Obteniendo la ubicación actual********************************/
     let latitude='';
@@ -216,29 +173,18 @@ var nsRegistro=(function(){
     });
 
     document.getElementById('limpiar').addEventListener('click', function() {
-        clean(1);
+        clean();
     });
     // Se pasa 1 para saber que es evento de boton 
 
-    function clean( src ){//resetea el contador
+    function clean(){//resetea el contador
       document.getElementById("namePromotor").textContent = "";
       document.getElementById("formulario").reset();
       banPromotor = 0; nsModal.numClic=0;
       let canvas = nsRegistro.getCanvas();
       var context = canvas.getContext('2d');      
-      context.clearRect(0, 0, canvas.width, canvas.height);
-
-      if( src === 1 ){
-        asignarIcono("e1", "");
-        asignarIcono("s1", "");
-        asignarIcono("e2", "");
-        asignarIcono("s2", "");
-        asignarHora("he1", "");
-        asignarHora("hs1", "");
-        asignarHora("he2", "");
-        asignarHora("hs2", "");
-      }
-
+      context.clearRect(0, 0, canvas.width, canvas.height)
+      
     }
     /******************************************************************************************************/
     //Código nuestro   
@@ -281,71 +227,6 @@ var nsRegistro=(function(){
       }
     }
 
-    /*async function getPromotor() {  
-      crearLoader();
-      const codnomina = document.getElementById("codnomina").value;
-      const promotor = arrayGlobal.filter(elemento => elemento[0] == codnomina);
-
-      if (promotor.length > 0) {
-        banPromotor = 1;
-        document.getElementById("namePromotor").innerHTML = promotor[0][1].toString().toUpperCase();
-
-        try {
-          const response = await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: new URLSearchParams({
-              action: "obtenerMarcacionesDelDia",
-              codnomina: codnomina
-            })
-          });
-
-          const result = await response.json();
-
-          if (result.status === "success") {
-            const marcaciones = result.data;
-            asignarIcono("e1", marcaciones.E1.estado);
-            asignarIcono("s1", marcaciones.S1.estado);
-            asignarIcono("e2", marcaciones.E2.estado);
-            asignarIcono("s2", marcaciones.S2.estado);
-            asignarHora("he1", marcaciones.E1.hora);
-            asignarHora("hs1", marcaciones.S1.hora);
-            asignarHora("he2", marcaciones.E2.hora);
-            asignarHora("hs2", marcaciones.S2.hora);
-            eliminarLoader();
-            return true;
-          } else { eliminarLoader();
-            throw new Error(result.mensaje || "Error al obtener marcaciones.");
-          }
-
-        } catch (error) {
-          console.error("Error al obtener marcaciones:", error.message);
-          alertSMS("Error al obtener marcaciones, vuelva a intentarlo");
-          eliminarLoader();
-          return false;
-        }
-        eliminarLoader();
-      } else {
-        banPromotor = 0;
-        document.getElementById("namePromotor").innerHTML = "";
-        document.getElementById("fecha").value = "";
-        document.getElementById("hora").value = "";
-        document.getElementById("coordenadas").value = "";
-        document.getElementById("pathIMG").value = "";
-        document.getElementById("mapa").value = "";
-        asignarIcono("e1", "");
-        asignarIcono("s1", "");
-        asignarIcono("e2", "");
-        asignarIcono("s2", "");
-        asignarHora("he1", "");
-        asignarHora("hs1", "");
-        asignarHora("he2", "");
-        asignarHora("hs2", "");
-        alertSMS("El código de promotor no existe en la base de datos");
-        eliminarLoader();
-        return false;
-      }
-    }*/
    /********************************************************************************************************/
     async function getPromotor() {
       crearLoader();
@@ -497,7 +378,7 @@ var nsRegistro=(function(){
       asignarHora("hs2", S2.hora);
 
       eliminarLoader();
-      clean( 0 );
+      clean();
 
       if (sms !== "")
         alertSMS( sms );
@@ -512,27 +393,7 @@ var nsRegistro=(function(){
       if (div) {
         div.innerText = hora || ""; // Asigna la hora o deja vacío si no hay hora
       }
-    }
-
-    function asignarIcono(idMarcacion, estado) {
-      const img = document.getElementById(`icon-${idMarcacion}`);      
-      
-      let icono="";
-
-      if ( estado.endsWith("AT") || estado.endsWith("OT") || estado.endsWith("BT") ) {        
-        if (estado.startsWith("E1") || estado.startsWith("E2")) {
-          icono = estado.endsWith("AT") ? icono1 : icono2;
-        } 
-        else if (estado.startsWith("S1") || estado.startsWith("S2") ) {
-          icono = estado.endsWith("OT") ? icono1 : icono2;
-        }         
-      }else{
-        icono =iconopregunta;
-      }  
-
-      img.src = `${icono}`;
-      img.alt = estado || "Sin marcación";
-    }
+    }   
 
     function errorescrituraHoja(){
       eliminarLoader();
