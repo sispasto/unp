@@ -254,7 +254,7 @@ var nsRegistro=(function(){
         // ✅ AQUÍ YA TIENES TODOS LOS CAMPOS DEL EMPLEADO
         console.log("Empleado:", empleado);
         document.getElementById("namePromotor").innerHTML =
-        data.nombre.toUpperCase();
+        empleado.nombre.toUpperCase();
 
         alertSMS(`Marcación registrada correctamente para ${empleado.nombre}`);
         formulario.reset();
