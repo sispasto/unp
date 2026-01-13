@@ -360,8 +360,8 @@ var nsRegistro=(function(){
 
       const { data, error } = await supabaseClient
         .from("pempleados")
-        .select("id, nombre, estado")
-        .eq("id", codnomina)
+        .select("codigo, cedula, nombre, estado")
+        .eq("codigo", codnomina)
         .single();
 
       if (error || !data) {
