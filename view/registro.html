@@ -161,33 +161,16 @@ var nsRegistro=(function(){
     /******************************************************************************************************/
     /****************************************Definición de eventos HTML***********************************/  
     document.querySelectorAll('input[type=number]').forEach( node => node.addEventListener('keypress', e => {
-      if(e.keyCode == 13) {e.preventDefault();            
-        getPromotor();
+      if(e.keyCode == 13) {e.preventDefault();                    
       }
     }));//Se captura la tecla enter para evitar el envio del formulario       
    
     // Detectar si el botón fue presionado con mouse
-    document.getElementById("frmSubmit").addEventListener("mousedown", () => {
-      submitDesdeBoton = true;
+    document.getElementById("frmSubmit").addEventListener("mousedown", () => {      
     });
     
     document.getElementById("codnomina").addEventListener("change", async () => {       
-        try {
-            const exito = await getPromotor();
-           
-            if (exito) { 
-                banPromotor=1; //Se encontro un promotor              
-                if (submitDesdeBoton) {
-
-                  submitDesdeBoton = false; // limpiar bandera
-                  document.getElementById("formulario").dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
-
-                }
-            }            
-        } catch (e) {
-            console.error("Error al procesar el formulario:", e);
-            alertSMS("Ocurrió un error inesperado al procesar el formulario.");
-        }
+        
     });
 
     document.getElementById('limpiar').addEventListener('click', function() {
@@ -258,7 +241,7 @@ var nsRegistro=(function(){
         // 2️⃣ OBTENER EMPLEADO COMPLETO
         const { data: empleado, error: errorEmpleado } = await supabaseClient
           .from("pempleados")
-          .select("*")
+          .select("nombre,estado")
           .eq("codigo", codigo)
           .single();
 
@@ -270,6 +253,8 @@ var nsRegistro=(function(){
 
         // ✅ AQUÍ YA TIENES TODOS LOS CAMPOS DEL EMPLEADO
         console.log("Empleado:", empleado);
+        document.getElementById("namePromotor").innerHTML =
+        data.nombre.toUpperCase();
 
         alertSMS(`Marcación registrada correctamente para ${empleado.nombre}`);
         formulario.reset();
