@@ -366,14 +366,12 @@ var nsRegistro=(function(){
 
       if (error || !data) {
         alertSMS("El código no existe");
-        limpiarPantalla();
         eliminarLoader();
         return false;
       }
 
       if (!data.estado) {
         alertSMS("Empleado inactivo");
-        limpiarPantalla();
         eliminarLoader();
         return false;
       }
