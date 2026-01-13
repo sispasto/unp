@@ -59,24 +59,26 @@
                   <input type="text" class="form-control" id="hora" name="hora" readonly>
                 </div>
 
-                <div class="row mb-3" style="display: block;">
-                  <div class="col">
+                <div class="row mb-3">
+                  <div class="col-md-6 mb-2">
                     <input type="radio" class="btn-check" name="tiporegistro" id="rbtEntrada" value="ENTRADA" autocomplete="off" checked>
-                    <label class="btn btn-outline-primary form-control" for="rbtEntrada">Entrada</label>
+                    <label class="btn btn-outline-primary w-100" for="rbtEntrada">Entrada</label>
                   </div>
-                  <div class="col">
+
+                  <div class="col-md-6 mb-2">
                     <input type="radio" class="btn-check" name="tiporegistro" id="rbtSalida" value="SALIDA" autocomplete="off">
-                    <label class="btn btn-outline-primary form-control" for="rbtSalida">Salida</label>
+                    <label class="btn btn-outline-primary w-100" for="rbtSalida">Salida</label>
                   </div>
                 </div>
+
 
                 <div class="mb-3" style="display: block;">
                   <label for="ubicacion" class="form-label">Ubicación</label>
                   <input type="text" class="form-control" id="coordenadas" name="coordenadas" readonly>
                   <!-- Campos ocultos para la imagen y mapa -->
-                  <input type="hidden" id="pathIMG" name="pathIMG">
-                  <input type="hidden" id="IDImg" name="IDImg">
-                  <input type="hidden" id="mapa" name="mapa">
+                  <input id="pathIMG" name="pathIMG">
+                  <input id="IDImg" name="IDImg">
+                  <input id="mapa" name="mapa">
                 </div> 
               </div>              
               <div class="card-footer d-flex gap-2">
@@ -123,17 +125,33 @@ var nsRegistro=(function(){
       //console.warn(`ERROR(${err.code}): ${err.message}`);
     }
     
-    async function getLocation(){ //función para obtener ubicación
-      if(navigator.geolocation){
-        try {
-          const ret = await navigator.geolocation.getCurrentPosition(success, error, options); // get ubicacion          
-        }catch (e) {
-          errorMsgElement.innerHTML = `navigator.getUserMedia error:${e.toString()}`;
-        }
-      }else{
-        alertSMS("Lo sentimos, el navegador no soporta la geolocalización!"); 
+   async function getLocation() {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject("Geolocalización no soportada");
+        return;
       }
-    }
+
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+
+          const coords = `${lat},${lng}`;
+
+          // Solo visual
+          document.getElementById("coordenadas").value = coords;
+
+          resolve(coords);
+        },
+        err => {
+          reject("No se pudo obtener la ubicación");
+        },
+        options
+      );
+    });
+  }
+
     
     /****************************************Definiación de variables globales**************************************/   
     //var arrayGlobal=[];//arreglo de promotores
@@ -189,43 +207,71 @@ var nsRegistro=(function(){
     /******************************************************************************************************/
     //Código nuestro   
 
-    async function procesarFormulario(event, formulario) {
+    function obtenerTipoRegistro() {
+      const seleccionado = document.querySelector(
+        'input[name="tiporegistro"]:checked'
+      );
+      return seleccionado ? seleccionado.value : null;
+    }
+
+
+   async function procesarFormulario(event, formulario) {
       event.preventDefault();
-      
-      const boton = document.getElementById("frmSubmit");      
-      boton.classList.add("disabled");
+
+      const boton = document.getElementById("frmSubmit");
       boton.disabled = true;
+      boton.classList.add("disabled");
 
-      let codnomina = document.getElementById("codnomina").value;
+      try {
+        // 1️⃣ Obtener código
+        const codigo = document.getElementById("codnomina").value.trim();
 
-      if (codnomina === "") { 
-        alertSMS("Por favor diligencie su código de nómina");
-        boton.classList.remove("disabled");      
-        boton.disabled = false;
-        return;
-      }
-
-      try { 
-        if (banPromotor == 0) {
-          const exito = await getPromotor();
-
-          if (exito) {
-            setDate();
-            getLocation();
-          }
-        } else {
-          setDate();
-          getLocation();
+        if (!codigo) {
+          alertSMS("Ingrese su código");
+          return;
         }
-        boton.classList.remove("disabled");      
-        boton.disabled = false; 
-      } catch (e) {
-        boton.classList.remove("disabled");      
+
+        // 2️⃣ Obtener tipo de registro (ENTRADA / SALIDA)
+        const tipo = obtenerTipoRegistro();
+        if (!tipo) {
+          alertSMS("Seleccione el tipo de registro");
+          return;
+        }
+
+        // 3️⃣ Obtener ubicación
+        const ubicacion = await getLocation();
+
+        // 4️⃣ Insertar marcación
+        const { error } = await supabaseClient
+          .from("pmarcaciones")
+          .insert({
+            codigo: codigo,
+            tipo_registro: tipo,
+            ubicacion: ubicacion,
+            foto: null
+          });
+
+        if (error) {
+          console.error("Error Supabase:", error);
+          alertSMS("Código no válido o no autorizado");
+          return;
+        }
+
+        // 5️⃣ Éxito
+        alertSMS("Marcación registrada correctamente");
+        formulario.reset();
+
+      } catch (err) {
+        console.error("Error general:", err);
+        alertSMS("No se pudo registrar la marcación");
+      } finally {
+        // 6️⃣ Siempre habilitar botón
         boton.disabled = false;
-        console.error("Error al procesar el formulario:", e);
-        alertSMS("Ocurrió un error inesperado al procesar el formulario.");
+        boton.classList.remove("disabled");
       }
     }
+
+
 
    /********************************************************************************************************/
     async function getPromotor() {
