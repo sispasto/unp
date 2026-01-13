@@ -223,7 +223,6 @@ var nsRegistro=(function(){
       boton.classList.add("disabled");
 
       try {
-        // 1️⃣ Obtener código
         const codigo = document.getElementById("codnomina").value.trim();
 
         if (!codigo) {
@@ -231,47 +230,58 @@ var nsRegistro=(function(){
           return;
         }
 
-        // 2️⃣ Obtener tipo de registro (ENTRADA / SALIDA)
-        const tipo = obtenerTipoRegistro();
-        if (!tipo) {
+        const tipoRegistro = obtenerTipoRegistro();
+        if (!tipoRegistro) {
           alertSMS("Seleccione el tipo de registro");
           return;
         }
 
-        // 3️⃣ Obtener ubicación
+        // 📍 Obtener ubicación
         const ubicacion = await getLocation();
 
-        // 4️⃣ Insertar marcación
-        const { error } = await supabaseClient
+        // 1️⃣ INSERTAR MARCACIÓN
+        const { error: errorInsert } = await supabaseClient
           .from("pmarcaciones")
           .insert({
             codigo: codigo,
-            tipo_registro: tipo,
+            tipo_registro: tipoRegistro,
             ubicacion: ubicacion,
             foto: null
           });
 
-        if (error) {
-          console.error("Error Supabase:", error);
+        if (errorInsert) {
+          console.error("Error al insertar marcación:", errorInsert);
           alertSMS("Código no válido o no autorizado");
           return;
         }
 
-        // 5️⃣ Éxito
-        alertSMS("Marcación registrada correctamente");
+        // 2️⃣ OBTENER EMPLEADO COMPLETO
+        const { data: empleado, error: errorEmpleado } = await supabaseClient
+          .from("pempleados")
+          .select("*")
+          .eq("codigo", codigo)
+          .single();
+
+        if (errorEmpleado || !empleado) {
+          console.error("Error al obtener empleado:", errorEmpleado);
+          alertSMS("Marcación registrada, pero no se pudo obtener el empleado");
+          return;
+        }
+
+        // ✅ AQUÍ YA TIENES TODOS LOS CAMPOS DEL EMPLEADO
+        console.log("Empleado:", empleado);
+
+        alertSMS(`Marcación registrada correctamente para ${empleado.nombre}`);
         formulario.reset();
 
       } catch (err) {
         console.error("Error general:", err);
         alertSMS("No se pudo registrar la marcación");
       } finally {
-        // 6️⃣ Siempre habilitar botón
         boton.disabled = false;
         boton.classList.remove("disabled");
       }
     }
-
-
 
    /********************************************************************************************************/
     async function getPromotor() {
