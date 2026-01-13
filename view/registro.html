@@ -165,14 +165,7 @@ var nsRegistro=(function(){
       }
     }));//Se captura la tecla enter para evitar el envio del formulario       
    
-    // Detectar si el botón fue presionado con mouse
-    document.getElementById("frmSubmit").addEventListener("mousedown", () => {      
-    });
-    
-    document.getElementById("codnomina").addEventListener("change", async () => {       
-        
-    });
-
+   
     document.getElementById('limpiar').addEventListener('click', function() {
         clean();
     });
@@ -253,8 +246,7 @@ var nsRegistro=(function(){
 
         // ✅ AQUÍ YA TIENES TODOS LOS CAMPOS DEL EMPLEADO
         console.log("Empleado:", empleado);
-        document.getElementById("namePromotor").innerHTML =
-        empleado.nombre.toUpperCase();
+        document.getElementById("namePromotor").innerHTML = empleado.nombre.toUpperCase();
 
         alertSMS(`Marcación registrada correctamente para ${empleado.nombre}`);
         formulario.reset();
@@ -269,46 +261,7 @@ var nsRegistro=(function(){
     }
 
    /********************************************************************************************************/
-    async function getPromotor() {
-      crearLoader();
-
-      const codnomina = document.getElementById("codnomina").value;
-
-      if (!codnomina) {
-        alertSMS("Ingrese el código");
-        eliminarLoader();
-        return false;
-      }
-
-      const { data, error } = await supabaseClient
-        .from("pempleados")
-        .select("codigo, cedula, nombre, estado")
-        .eq("codigo", codnomina)
-        .single();
-
-      if (error || !data) {
-        alertSMS("El código no existe");
-        eliminarLoader();
-        return false;
-      }
-
-      if (!data.estado) {
-        alertSMS("Empleado inactivo");
-        eliminarLoader();
-        return false;
-      }
-
-      banPromotor = 1;
-      document.getElementById("namePromotor").innerHTML =
-        data.nombre.toUpperCase();
-
-      eliminarLoader();
-      return true;
-    }
-
-   /********************************************************************************************************/
-
-
+    
     function setDate(){ 
       let date = new Date();      
       let hora = date.toLocaleTimeString("es-CO", { hour12: false });  
