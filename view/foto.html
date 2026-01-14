@@ -44,95 +44,96 @@
   </div>
 
   <script>
-    var nsModal = (function () {
-      let objCamera = null;
-      let myModalEl = document.getElementById('staticBackdrop');
-      let numClic = 0;
+  var nsModal = (function () {
+    let objCamera = null;
+    let myModalEl = document.getElementById('staticBackdrop');
+    let numClic = 0;
 
-      const video = document.getElementById('video');
-      const snap = document.getElementById('snap');
-      const canvas = document.getElementById('canvas');           
+    const video = document.getElementById('video');
+    const snap = document.getElementById('snap');
+    const canvas = document.getElementById('canvas');
 
-      document.addEventListener('click', function(e) { 
-        if (e.target && e.target.id === 'opencamera') {
-          openCamera();
-        }
-      });
+    document.addEventListener('click', function(e) { 
+      if (e.target && e.target.id === 'opencamera') {
+        openCamera();
+      }
+    });
 
-      snap.addEventListener('click', function () {
-        let context = canvas.getContext('2d');
-        canvas.width = 320;
-        canvas.height = 240;
-        context.drawImage(video, 0, 0, 320, 240);      
-        nsRegistro.setCanvas( canvas );  // Aquí ya guardas la referencia
-        nsModal.numClic = 1; // Lo pones manualmente a 1 si la foto fue tomada
-      });
+    snap.addEventListener('click', function () {
+      const context = canvas.getContext('2d');
+      canvas.width = 320;
+      canvas.height = 240;
+      context.drawImage(video, 0, 0, 320, 240);
 
-      myModalEl.addEventListener('hidden.bs.modal', function () {        
-        // Detener la cámara si está activa
-        if (objCamera != null) {
-          objCamera.getTracks().forEach(track => track.stop()); // Detener todos los tracks
-          objCamera = null;
-        }
+      nsRegistro.setCanvas(canvas);
+      numClic = 1; // ✅ foto tomada
+    });
 
-        // Limpieza adicional por si el fondo no se elimina
-        const backdrop = document.querySelector('.modal-backdrop');
-        if (backdrop) backdrop.remove();
-        
-      });
-
-      
-      const constraints = {
-        audio: false,
-        video: {
-          facingMode: "user"
-        }
-      };
-
-      async function init() {
-        if (objCamera) return; // Ya hay una cámara activa, no vuelvas a abrir
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia(constraints);
-          handleSuccess(stream);
-        } catch (e) {
-          if (e.name === "NotFoundError" || e.name === "OverconstrainedError") {
-            alertSMS("¡No se encontró ninguna cámara en su dispositivo!");
-          } else if (e.name === "NotAllowedError") {
-            alertSMS("¡Permiso para usar la cámara denegado!");
-          } else {
-            alertSMS("¡Su navegador no puede usar la cámara por un error inesperado!");
-          }
-          // Opcional: log para desarrolladores
-          console.error(`getUserMedia error: ${e.name} - ${e.message}`);
-        }
+    myModalEl.addEventListener('hidden.bs.modal', function () {        
+      if (objCamera != null) {
+        objCamera.getTracks().forEach(track => track.stop());
+        objCamera = null;
       }
 
-      function handleSuccess(stream) {
-        window.stream = stream;
-        video.srcObject = stream;
-        objCamera = stream;
+      const backdrop = document.querySelector('.modal-backdrop');
+      if (backdrop) backdrop.remove();
+    });
 
-        // Ajustar el tamaño del canvas al tamaño del video en tiempo real
-        video.addEventListener('loadedmetadata', () => {
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-        });
+    const constraints = {
+      audio: false,
+      video: { facingMode: "user" }
+    };
+
+    async function init() {
+      if (objCamera) return;
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        handleSuccess(stream);
+      } catch (e) {
+        alertSMS("Error al acceder a la cámara");
+        console.error(e);
       }
+    }
 
-      myModalEl.addEventListener('shown.bs.modal', function () {
-        init(); // <-- Inicia la cámara solo cuando el modal ya se ha mostrado
+    function handleSuccess(stream) {
+      video.srcObject = stream;
+      objCamera = stream;
+
+      video.addEventListener('loadedmetadata', () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
       });
+    }
 
-      function openCamera() {
-        cerrarModalesActivos();
-        const bsModal = new bootstrap.Modal(myModalEl);
-        bsModal.show(); // <-- solo muestra el modal
-      }
+    myModalEl.addEventListener('shown.bs.modal', init);
 
-      return {
-        numClic: numClic,
-        canvas: canvas
-      };
+    function openCamera() {
+      cerrarModalesActivos();
+      const bsModal = new bootstrap.Modal(myModalEl);
+      bsModal.show();
+    }
 
-    })();
-  </script>
+    // ==========================
+    // ✅ FUNCIÓN RESET (LA CLAVE)
+    // ==========================
+    function reset() {
+      numClic = 0;
+
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function getNumClic() {
+      return numClic;
+    }
+
+    return {
+      openCamera,
+      reset,
+      getNumClic,
+      getCanvas: () => canvas
+    };
+
+  })();
+</script>
+

@@ -173,19 +173,10 @@ var nsRegistro=(function(){
         clean();
     });
     // Se pasa 1 para saber que es evento de boton 
-
-    function clean(){//resetea el contador
-      document.getElementById("namePromotor").textContent = "";
-      document.getElementById("formulario").reset();
-      banPromotor = 0; nsModal.numClic=0;
-      let canvas = nsRegistro.getCanvas();
-      var context = canvas.getContext('2d');      
-      context.clearRect(0, 0, canvas.width, canvas.height)
-      
-    }
+  
     /***************************************************************************************************************/
     /****************************************************procesarFormulario*****************************************/
-   async function procesarFormulario(event, formulario) {
+    async function procesarFormulario(event, formulario) {
       event.preventDefault();
 
       const boton = document.getElementById("frmSubmit");
@@ -204,8 +195,9 @@ var nsRegistro=(function(){
           alertSMS("Seleccione el tipo de registro");
           return;
         }
-        console.log("nsModal.numClic:", nsModal.numClic);
-        if (nsModal.numClic <= 0) {
+
+        // ✅ USO CORRECTO DEL MÓDULO
+        if (nsModal.getNumClic() <= 0) {
           alertSMS("La fotografía es obligatoria");
           return;
         }
@@ -247,7 +239,6 @@ var nsRegistro=(function(){
         );
 
         const result = await response.json();
-        console.log(result);
 
         if (!response.ok) {
           throw new Error(result.error || "Error al registrar marcación");
@@ -261,7 +252,12 @@ var nsRegistro=(function(){
           `Marcación registrada correctamente para ${result.empleado.nombre}`
         );
 
-        clean
+        // ==========================
+        // ✅ RESET TOTAL (CLAVE)
+        // ==========================
+        nsModal.reset();      // limpia canvas + numClic = 0
+        formulario.reset();  // limpia inputs
+        document.getElementById("namePromotor").textContent = "";
 
       } catch (err) {
         console.error(err);
@@ -271,6 +267,7 @@ var nsRegistro=(function(){
         boton.classList.remove("disabled");
       }
     }
+
 
     /*************************************Guardar Imagen***************************************************/
     function dataURLtoBlob(dataurl) {
