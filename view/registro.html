@@ -81,7 +81,22 @@
   </div>
 </div>
 <script>  
-
+// LISTENER DEL BOTÓN DE CAMARA
+    // ==========================
+    document.addEventListener('DOMContentLoaded', () => {
+        const btnCamera = document.getElementById('opencamera');
+        if (btnCamera) {
+            btnCamera.addEventListener('click', () => {
+                const fotoComp = document.querySelector('foto-component');
+                if (fotoComp) {
+                    fotoComp.openCamera(); // Abre el modal dinámico
+                } else {
+                    console.error("FotoComponent no encontrado en la página");
+                }
+            });
+        }
+    });
+    
 var nsRegistro=(function(){ 
     /******************************************************************************************************/ 
     var dataForm = null;
@@ -274,23 +289,7 @@ var nsRegistro=(function(){
         'input[name="tiporegistro"]:checked'
       );
       return seleccionado ? seleccionado.value : null;
-    }
-
-     // LISTENER DEL BOTÓN DE CAMARA
-    // ==========================
-    document.addEventListener('DOMContentLoaded', () => {
-        const btnCamera = document.getElementById('opencamera');
-        if (btnCamera) {
-            btnCamera.addEventListener('click', () => {
-                const fotoComp = document.querySelector('foto-component');
-                if (fotoComp) {
-                    fotoComp.openCamera(); // Abre el modal dinámico
-                } else {
-                    console.error("FotoComponent no encontrado en la página");
-                }
-            });
-        }
-    });
+    }    
 
     // Expone las funciones públicas del módulo
     return {
