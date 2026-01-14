@@ -69,7 +69,7 @@
               </div>              
               <div class="card-footer d-flex gap-2">
                 <button type="submit" class="btn btn-primary flex-fill" id="frmSubmit">Enviar</button>
-                <button type="button" class="btn btn-secondary flex-fill" id="limpiar">Nuevo</button>
+                <!--<button type="button" class="btn btn-secondary flex-fill" id="limpiar">Nuevo</button>-->
               </div>
             </div>
           </div>
@@ -153,11 +153,8 @@ var nsRegistro=(function(){
       if(e.keyCode == 13) {e.preventDefault();                    
       }
     }));//Se captura la tecla enter para evitar el envio del formulario       
-   
-   
-    document.getElementById('limpiar').addEventListener('click', function() {
-        clean();
-    });
+    
+    
     // Se pasa 1 para saber que es evento de boton 
   
     /***************************************************************************************************************/
