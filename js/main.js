@@ -67,6 +67,14 @@ function getNomina() {
   main.appendChild(vmodal); 
 }
 
+function getConsulta() {  
+  let main = document.getElementById('App');
+  removeALLChilds(main);
+  const consulta = document.createElement('consulta-component');
+  consulta.setAttribute('container', '#App'); // <-- aquí pasas el parámetro
+  main.appendChild(consulta); 
+}
+
 async function getArrayPromotors() {
   try {
     const response = await fetch(API_URL, {
