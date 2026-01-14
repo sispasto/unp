@@ -184,123 +184,125 @@
     <main class="container-fluid p-0 m-0 text-center" id="App"></main>
     <script src="js/main.js"></script>   
     <script>
-      const SUPABASE_URL = "https://pmbxyfketmuzocepllvf.supabase.co";
-      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtYnh5ZmtldG11em9jZXBsbHZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3ODE4NjUsImV4cCI6MjA3MzM1Nzg2NX0.oh9zssayvCPp-jcCohQugTx28Ds2Ts-y7Tbp-pgX1XE";
+    const SUPABASE_URL = "https://pmbxyfketmuzocepllvf.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtYnh5ZmtldG11em9jZXBsbHZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3ODE4NjUsImV4cCI6MjA3MzM1Nzg2NX0.oh9zssayvCPp-jcCohQugTx28Ds2Ts-y7Tbp-pgX1XE";
 
-      // Inicializar sesión
-      sessionStorage.setItem('nombreUsuario', 'Invitado');
-      sessionStorage.setItem('codigoUsuario', '0');
-      sessionStorage.setItem('rol', 0);
-      document.getElementById('textUser').textContent = sessionStorage.getItem('nombreUsuario');
+    // Inicializar sesión
+    sessionStorage.setItem('nombreUsuario', 'Invitado');
+    sessionStorage.setItem('codigoUsuario', '0');
+    sessionStorage.setItem('rol', 0);
+    document.getElementById('textUser').textContent = sessionStorage.getItem('nombreUsuario');
 
-      // Mostrar modal
-      function showLoginModal() {
-        cerrarModalesActivos();
-        new bootstrap.Modal(document.getElementById('loginModal')).show();
-      }
+    // Mostrar modal
+    function showLoginModal() {
+      cerrarModalesActivos();
+      new bootstrap.Modal(document.getElementById('loginModal')).show();
+    }
 
-      function showChangePasswordModal() {
-        cerrarModalesActivos();
-        new bootstrap.Modal(document.getElementById('changePasswordModal')).show();
-      }
+    function showChangePasswordModal() {
+      cerrarModalesActivos();
+      new bootstrap.Modal(document.getElementById('changePasswordModal')).show();
+    }
 
-      // Autenticar usuario
-      async function authenticateUser() {
-        const usuario = document.getElementById('username').value;
-        const clave = document.getElementById('password').value;
-        await validarUsuario(usuario, clave);
-      }
+    // Autenticar usuario
+    async function authenticateUser() {
+      const usuario = document.getElementById('username').value;
+      const clave = document.getElementById('password').value;
+      await validarUsuario(usuario, clave);
+    }
 
-      async function validarUsuario(usuario, clave) {
-        try {
-          const response = await fetch(`${SUPABASE_URL}/functions/v1/authUser`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "apikey": SUPABASE_ANON_KEY
-            },
-            body: JSON.stringify({
-              action: "login",
-              usuario: usuario,
-              clave: clave
-            })
-          });
+    async function validarUsuario(usuario, clave) {
+      try {
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/authUser`, {
+          method: "POST",          
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "apikey": SUPABASE_ANON_KEY
+          },
+          body: JSON.stringify({
+            action: "login",
+            usuario: usuario,
+            clave: clave
+          })
+        });
 
-          const data = await response.json();
+        const data = await response.json();
 
-          if (data.status === "success") {
-            const resultado = data.usuario;
+        if (data.status === "success") {
+          const resultado = data.usuario;
 
-            // Mostrar menú según rol
-            if (resultado.rol === 2) { // Admin
-              document.getElementById('navbarItemsAdmin').style.display = 'block';
-              document.getElementById('navbarItemsUser').style.display = 'none';
-              document.getElementById('navbarItemsDefault').style.display = 'none';
-            } else { // Usuario normal
-              document.getElementById('navbarItemsUser').style.display = 'block';
-              document.getElementById('navbarItemsAdmin').style.display = 'none';
-              document.getElementById('navbarItemsDefault').style.display = 'none';
-            }
-
-            sessionStorage.setItem('nombreUsuario', resultado.nomusuario);
-            sessionStorage.setItem('codigoUsuario', resultado.codigo);
-            sessionStorage.setItem('rol', resultado.rol);
-            document.getElementById('textUser').textContent = resultado.nomusuario;
-
-            bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide();
-            new bootstrap.Collapse(document.getElementById('navbarText'), { toggle: false }).hide();
-
-            getHome();
-            alertSMS("Autenticación correcta");
-          } else {
-            alertSMS(data.mensaje || "Usuario o clave incorrectos");
+          // Mostrar menú según rol
+          if (resultado.rol === 2) { // Admin
+            document.getElementById('navbarItemsAdmin').style.display = 'block';
+            document.getElementById('navbarItemsUser').style.display = 'none';
+            document.getElementById('navbarItemsDefault').style.display = 'none';
+          } else { // Usuario normal
+            document.getElementById('navbarItemsUser').style.display = 'block';
+            document.getElementById('navbarItemsAdmin').style.display = 'none';
+            document.getElementById('navbarItemsDefault').style.display = 'none';
           }
-        } catch (err) {
-          console.error(err);
-          alertSMS("Error en la conexión");
+
+          sessionStorage.setItem('nombreUsuario', resultado.nomusuario);
+          sessionStorage.setItem('codigoUsuario', resultado.codigo);
+          sessionStorage.setItem('rol', resultado.rol);
+          document.getElementById('textUser').textContent = resultado.nomusuario;
+
+          bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide();
+          new bootstrap.Collapse(document.getElementById('navbarText'), { toggle: false }).hide();
+
+          getHome();
+          alertSMS("Autenticación correcta");
+        } else {
+          alertSMS(data.mensaje || "Usuario o clave incorrectos");
         }
+      } catch (err) {
+        console.error(err);
+        alertSMS("Error en la conexión");
+      }
+    }
+
+    // Actualizar contraseña
+    async function updatePassword() {
+      const usuario = sessionStorage.getItem('codigoUsuario');
+      const claveNueva = document.getElementById('newPassword').value;
+      const confirmacionClave = document.getElementById('confirmNewPassword').value;
+
+      if (claveNueva !== confirmacionClave) {
+        alertSMS("Las claves no coinciden");
+        return;
       }
 
-      // Actualizar contraseña
-      async function updatePassword() {
-        const usuario = sessionStorage.getItem('codigoUsuario');
-        const claveNueva = document.getElementById('newPassword').value;
-        const confirmacionClave = document.getElementById('confirmNewPassword').value;
+      try {
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/authUser`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "apikey": SUPABASE_ANON_KEY
+          },
+          body: JSON.stringify({
+            action: "updatePassword",
+            usuario: usuario,
+            claveNueva: claveNueva
+          })
+        });
 
-        if (claveNueva !== confirmacionClave) {
-          alertSMS("Las claves no coinciden");
-          return;
+        const data = await response.json();
+
+        if (data.status === "success") {
+          bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
+          new bootstrap.Collapse(document.getElementById('navbarText'), { toggle: false }).hide();
+          alertSMS("Clave actualizada exitosamente");
+        } else {
+          alertSMS(data.mensaje || "No se pudo actualizar la clave");
         }
-
-        try {
-          const response = await fetch(`${SUPABASE_URL}/functions/v1/authUser`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "apikey": SUPABASE_ANON_KEY
-            },
-            body: JSON.stringify({
-              action: "updatePassword",
-              usuario: usuario,
-              claveNueva: claveNueva
-            })
-          });
-
-          const data = await response.json();
-
-          if (data.status === "success") {
-            bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
-            new bootstrap.Collapse(document.getElementById('navbarText'), { toggle: false }).hide();
-            alertSMS("Clave actualizada exitosamente");
-          } else {
-            alertSMS(data.mensaje || "No se pudo actualizar la clave");
-          }
-        } catch (err) {
-          console.error(err);
-          alertSMS("Error en la conexión");
-        }
+      } catch (err) {
+        console.error(err);
+        alertSMS("Error en la conexión");
       }
-    </script>
+    }
+  </script>
 
     <script>
       if ('serviceWorker' in navigator) {
