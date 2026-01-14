@@ -226,7 +226,8 @@ var nsRegistro=(function(){
           });
 
         if (errorInsert) {
-          console.error("Error al insertar marcación:", errorInsert);
+          console.error("Error al insertar marcación:"/*, errorInsert*/);
+          document.getElementById("namePromotor").innerHTML = "";
           alertSMS("Código no válido o no autorizado");
           return;
         }
