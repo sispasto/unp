@@ -59,7 +59,7 @@
                     </li>                                    
                     <!-- Login Button -->
                     <li class="nav-item" id="loginNavItem">
-                        <a class="nav-link" href="#" onclick="showLoginModal();"><i class="bi bi-door-open"> Login</i></a>
+                        <a class="nav-link" href="#" onclick="showLoginModal();"><i class="bi bi-door-open">Login</i></a>
                     </li>              
                 </ul>
                 <!-- Rol Usuario -->
@@ -183,110 +183,106 @@
     
     <main class="container-fluid p-0 m-0 text-center" id="App"></main>
     <script src="js/main.js"></script>   
+    <script>
+      // Supabase URL y Service Role Key (solo en dev, en prod conviene usar env del server)
+      const SUPABASE_URL = "https://pmbxyfketmuzocepllvf.supabase.co";
+      const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtYnh5ZmtldG11em9jZXBsbHZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3ODE4NjUsImV4cCI6MjA3MzM1Nzg2NX0.oh9zssayvCPp-jcCohQugTx28Ds2Ts-y7Tbp-pgX1XE";
+      const API_URL = `${SUPABASE_URL}/functions/v1/authUser`; // nombre de tu Edge Function
 
-    <script> 
-      sessionStorage.setItem('nombreUsuario', 'Invitado');//Creo variable de session para usuario
-      sessionStorage.setItem('codigoUsuario', '0');// inicia en cero quiere decir que no se ha logeado
-      sessionStorage.setItem('rol',0)//No se ha logueado ningun usuario
+      // Inicializar variables de sesión
+      sessionStorage.setItem('nombreUsuario', 'Invitado');
+      sessionStorage.setItem('codigoUsuario', '0');
+      sessionStorage.setItem('rol', 0);
       document.getElementById('textUser').textContent = sessionStorage.getItem('nombreUsuario');
-      // Mostrar el modal de login
-      function showLoginModal() {       
-        cerrarModalesActivos(); 
-        var loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
-        loginModal.show();
+
+      // Mostrar modal de login
+      function showLoginModal() {
+        cerrarModalesActivos();
+        new bootstrap.Modal(document.getElementById('loginModal')).show();
       }
 
-      // Mostrar el modal de cambiar contraseña
+      // Mostrar modal de cambio de clave
       function showChangePasswordModal() {
         cerrarModalesActivos();
-        var changePasswordModal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
-        changePasswordModal.show();
+        new bootstrap.Modal(document.getElementById('changePasswordModal')).show();
       }
 
-      // Autenticar al usuario
-     function authenticateUser() {
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        validarUsuario(username, password);
+      // Autenticar usuario
+      function authenticateUser() {
+        const usuario = document.getElementById('username').value;
+        const clave = document.getElementById('password').value;
+        validarUsuario(usuario, clave);
       }
 
       function validarUsuario(usuario, clave) {
         fetch(API_URL, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            'apikey': SUPABASE_ANON_KEY
           },
           body: new URLSearchParams({
-            action: 'login', // 
+            action: 'login',
             usuario: usuario,
             clave: clave
           })
         })
-        .then(response => response.json())
+        .then(res => res.json())
         .then(data => {
           if (data.status === 'success') {
-            const resultado = data.usuario; // 
+            const resultado = data.usuario;
 
-            if (resultado.tipo === 'admin') {
-              document.getElementById('navbarItemsDefault').style.display = 'none';
-              document.getElementById('navbarItemsUser').style.display = 'none';
+            // Rol real: 1 = usuario, 2 = admin
+            if (resultado.rol === 2) { // Admin
               document.getElementById('navbarItemsAdmin').style.display = 'block';
-              sessionStorage.setItem('nombreUsuario', resultado.nombre);
-              document.getElementById('textUser').textContent = resultado.nombre;
-              sessionStorage.setItem('codigoUsuario', resultado.codigo);
-              sessionStorage.setItem('rol', 1);
-              const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
-              loginModal.hide();             
-              const navbarCollapse = document.getElementById('navbarText');
-              const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse) || new bootstrap.Collapse(navbarCollapse, { toggle: false });
-              bsCollapse.hide();
-              getHome();
-              alertSMS("Autenticación correcta");
-            } else {
+              document.getElementById('navbarItemsUser').style.display = 'none';
               document.getElementById('navbarItemsDefault').style.display = 'none';
+            } else { // Usuario estándar
               document.getElementById('navbarItemsUser').style.display = 'block';
               document.getElementById('navbarItemsAdmin').style.display = 'none';
-              sessionStorage.setItem('nombreUsuario', resultado.nombre);
-              document.getElementById('textUser').textContent = resultado.nombre;
-              sessionStorage.setItem('codigoUsuario', resultado.codigo);
-              sessionStorage.setItem('rol', 2);
-              const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
-              loginModal.hide();
-              const navbarCollapse = document.getElementById('navbarText');
-              const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse) || new bootstrap.Collapse(navbarCollapse, { toggle: false });
-              bsCollapse.hide();
-              getHome();
-              alertSMS("Autenticación correcta");
+              document.getElementById('navbarItemsDefault').style.display = 'none';
             }
+
+            sessionStorage.setItem('nombreUsuario', resultado.nomusuario);
+            sessionStorage.setItem('codigoUsuario', resultado.codigo);
+            sessionStorage.setItem('rol', resultado.rol);
+            document.getElementById('textUser').textContent = resultado.nomusuario;
+
+            bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide();
+            const navbarCollapse = document.getElementById('navbarText');
+            new bootstrap.Collapse(navbarCollapse, { toggle: false }).hide();
+
+            getHome();
+            alertSMS("Autenticación correcta");
           } else {
-            alertSMS(data.mensaje || "Usuario o clave incorrectos"); // 
+            alertSMS(data.mensaje || "Usuario o clave incorrectos");
           }
         })
-        .catch(error => {
-          console.error('Error:', error);
+        .catch(err => {
+          console.error(err);
           alertSMS("Error en la conexión");
         });
       }
-      // Función para cerrar sesión
+
+      // Cerrar sesión
       function logout() {
-        // dejar la opción por defecto
-        // Ocultar la opción de Login
-        document.getElementById('navbarItemsDefault').style.display = 'block'; // Mostrar la opción de Login de nuevo 
+        document.getElementById('navbarItemsDefault').style.display = 'block';
+        document.getElementById('navbarItemsUser').style.display = 'none';
         document.getElementById('navbarItemsAdmin').style.display = 'none';
-        document.getElementById('navbarItemsUser').style.display = 'none'; 
+
         sessionStorage.setItem('nombreUsuario', 'Invitado');
         sessionStorage.setItem('codigoUsuario', '0');
-        sessionStorage.setItem('rol',0)
-        document.getElementById('textUser').textContent = sessionStorage.getItem('nombreUsuario');
-        document.getElementById('username').value='';
-        document.getElementById('password').value='';  
-        document.getElementById('newPassword').value='';
-        document.getElementById('confirmNewPassword').value='';    
-        const navbarCollapse = document.getElementById('navbarText');
-        const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse) || new bootstrap.Collapse(navbarCollapse, { toggle: false });
-        bsCollapse.hide();
+        sessionStorage.setItem('rol', 0);
+        document.getElementById('textUser').textContent = 'Invitado';
+
+        document.getElementById('username').value = '';
+        document.getElementById('password').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmNewPassword').value = '';
+
+        new bootstrap.Collapse(document.getElementById('navbarText'), { toggle: false }).hide();
         getHome();
-        alertSMS("Sesion cerrada correctamente");
+        alertSMS("Sesión cerrada correctamente");
       }
 
       // Actualizar contraseña
@@ -294,44 +290,42 @@
         const usuario = sessionStorage.getItem('codigoUsuario');
         const claveNueva = document.getElementById('newPassword').value;
         const confirmacionClave = document.getElementById('confirmNewPassword').value;
-        const changePasswordModal = bootstrap.Modal.getInstance(document.getElementById('changePasswordModal'));
 
-        if (claveNueva === confirmacionClave) {
-          fetch(API_URL, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-            },
-            body: new URLSearchParams({
-              action: 'updatePassword',
-              usuario: usuario,
-              claveNueva: claveNueva
-            })
-          })
-          .then(response => response.json())
-          .then(data => {
-            if (data.status === 'success') {
-              changePasswordModal.hide();
-              
-              const navbarCollapse = document.getElementById('navbarText');
-              const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse) || new bootstrap.Collapse(navbarCollapse, { toggle: false });
-              bsCollapse.hide();
-
-              alertSMS("Clave actualizada exitosamente");
-            } else {
-              alertSMS(data.mensaje || "No se pudo actualizar la clave");
-            }
-          })
-          .catch(error => {
-            console.error('Error:', error);
-            alertSMS("Error en la conexión");
-          });
-        } else {
+        if (claveNueva !== confirmacionClave) {
           alertSMS("Las claves no coinciden");
+          return;
         }
-      }
 
+        fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            'apikey': SUPABASE_ANON_KEY
+          },
+          body: new URLSearchParams({
+            action: 'updatePassword',
+            usuario: usuario,
+            claveNueva: claveNueva
+          })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === 'success') {
+            bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
+            new bootstrap.Collapse(document.getElementById('navbarText'), { toggle: false }).hide();
+            alertSMS("Clave actualizada exitosamente");
+          } else {
+            alertSMS(data.mensaje || "No se pudo actualizar la clave");
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          alertSMS("Error en la conexión");
+        });
+      }
     </script>
+
+    
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
