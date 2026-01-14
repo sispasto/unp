@@ -172,18 +172,21 @@ var nsRegistro=(function(){
       try {
         const codigo = document.getElementById("codnomina").value.trim();
         if (!codigo) {
+          document.getElementById("namePromotor").textContent = "";
           alertSMS("Ingrese su código");
           return;
         }
 
         const tipoRegistro = obtenerTipoRegistro();
         if (!tipoRegistro) {
+          document.getElementById("namePromotor").textContent = "";
           alertSMS("Seleccione el tipo de registro");
           return;
         }
 
         // ✅ USO CORRECTO DEL MÓDULO
         if (nsModal.getNumClic() <= 0) {
+          document.getElementById("namePromotor").textContent = "";
           alertSMS("La fotografía es obligatoria");
           return;
         }
@@ -201,6 +204,7 @@ var nsRegistro=(function(){
         });
 
         if (!fotoBlob) {
+          document.getElementById("namePromotor").textContent = "";
           throw new Error("No se pudo generar la imagen");
         }
 
