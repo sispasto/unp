@@ -220,9 +220,8 @@ async function authenticateUser() {
     const response = await fetch(`${SUPABASE_URL}/functions/v1/authUser`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-        "apikey": SUPABASE_ANON_KEY
+        "Content-Type": "application/json", // solo este header        
+        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
       },
       body: JSON.stringify({
         action: "login",
@@ -255,10 +254,11 @@ async function authenticateUser() {
       alertSMS(data.mensaje || "Usuario o clave incorrectos");
     }
   } catch (err) {
-    console.error(err);
-    alertSMS("Error en la conexión");
+    console.error("Error al conectar con la Edge Function:", err);
+    alertSMS("Error en la conexión con el servidor");
   }
 }
+
 
 // ============================
 // ACTUALIZAR CONTRASEÑA
@@ -283,9 +283,8 @@ async function updatePassword() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-        "apikey": SUPABASE_ANON_KEY
-      },
+        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+      },      
       body: JSON.stringify({
         action: "updatePassword",
         usuario: usuario,
