@@ -219,12 +219,14 @@ var nsRegistro=(function(){
           {
             method: "POST",
             headers: {
-              "Content-Type": "application/json"
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+              "apikey": SUPABASE_ANON_KEY
             }
-            // ⛔ NO body
           }
         );
-
+        
+        /*hola*/
         const result = await response.json();
         console.log("Respuesta Edge:", result);
 
