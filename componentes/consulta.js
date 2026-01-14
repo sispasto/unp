@@ -27,12 +27,8 @@ class ConsultaComponent extends HTMLElement {
       // Limpiar el componente
       this.innerHTML = '';
       this.appendChild(template.content.cloneNode(true));
-
       // Limpiar scripts dinámicos anteriores
-      container
-        .querySelectorAll('script[data-dynamic="true"]')
-        .forEach(s => s.remove());
-
+      container.querySelectorAll('script[data-dynamic="true"]').forEach(s => s.remove());
       // Insertar scripts dinámicamente
       scripts.forEach(oldScript => {
         const newScript = document.createElement('script');
