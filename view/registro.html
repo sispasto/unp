@@ -38,7 +38,8 @@
               </div>
               <div class="card-body">
                 <div class="text-center mb-4">
-                  <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#staticBackdrop" id="opencamera">
+                   <!-- Botón actualizado: eliminamos data-bs-toggle y data-bs-target -->
+                  <button type="button" class="btn btn-dark" id="opencamera">
                     <i class="bi bi-camera-fill"></i>
                   </button>
                 </div>
@@ -80,6 +81,7 @@
   </div>
 </div>
 <script>  
+
 var nsRegistro=(function(){ 
     /******************************************************************************************************/ 
     var dataForm = null;
@@ -274,7 +276,23 @@ var nsRegistro=(function(){
       return seleccionado ? seleccionado.value : null;
     }
 
-      // Expone las funciones públicas del módulo
+     // LISTENER DEL BOTÓN DE CAMARA
+    // ==========================
+    document.addEventListener('DOMContentLoaded', () => {
+        const btnCamera = document.getElementById('opencamera');
+        if (btnCamera) {
+            btnCamera.addEventListener('click', () => {
+                const fotoComp = document.querySelector('foto-component');
+                if (fotoComp) {
+                    fotoComp.openCamera(); // Abre el modal dinámico
+                } else {
+                    console.error("FotoComponent no encontrado en la página");
+                }
+            });
+        }
+    });
+
+    // Expone las funciones públicas del módulo
     return {
         procesarFormulario        
     };
