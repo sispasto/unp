@@ -180,18 +180,9 @@ var nsRegistro=(function(){
       context.clearRect(0, 0, canvas.width, canvas.height)
       
     }
-    /******************************************************************************************************/
-    //Código nuestro   
-
-    function obtenerTipoRegistro() {
-      const seleccionado = document.querySelector(
-        'input[name="tiporegistro"]:checked'
-      );
-      return seleccionado ? seleccionado.value : null;
-    }
-
-
-   async function procesarFormulario(event, formulario) {
+    /***************************************************************************************************************/
+    /****************************************************procesarFormulario*****************************************/
+    async function procesarFormulario(event, formulario) {
       event.preventDefault();
 
       const boton = document.getElementById("frmSubmit");
@@ -200,7 +191,6 @@ var nsRegistro=(function(){
 
       try {
         const codigo = document.getElementById("codnomina").value.trim();
-
         if (!codigo) {
           alertSMS("Ingrese su código");
           return;
@@ -212,189 +202,69 @@ var nsRegistro=(function(){
           return;
         }
 
-        // 📍 Obtener ubicación
+        if (nsModal.numClic <= 0) {
+          alertSMS("La fotografía es obligatoria");
+          return;
+        }
+
         const ubicacion = await getLocation();
 
-        // 1️⃣ INSERTAR MARCACIÓN
-        const { error: errorInsert } = await supabaseClient
-          .from("pmarcaciones")
-          .insert({
-            codigo: codigo,
+        // 📸 imagen desde canvas
+        const canvas = nsRegistro.getCanvas();
+        const fotoBase64 = canvas.toDataURL("image/jpeg", 0.6);
+
+        // 🔥 enviar TODO a la Edge Function
+        const response = await fetch("/functions/v1/registrar-marcacion", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            codigo,
             tipo_registro: tipoRegistro,
-            ubicacion: ubicacion,
-            foto: null
-          });
-
-        if (errorInsert) {
-          console.error("Error al insertar marcación:"/*, errorInsert*/);
-          document.getElementById("namePromotor").innerHTML = "";
-          alertSMS("Código no válido o no autorizado");
-          return;
-        }
-
-        // 2️⃣ OBTENER EMPLEADO COMPLETO
-        const { data: empleado, error: errorEmpleado } = await supabaseClient
-          .from("pempleados")
-          .select("nombre,estado")
-          .eq("codigo", codigo)
-          .single();
-
-        if (errorEmpleado || !empleado) {
-          console.error("Error al obtener empleado:", errorEmpleado);
-          alertSMS("Marcación registrada, pero no se pudo obtener el empleado");
-          return;
-        }
-
-        // ✅ AQUÍ YA TIENES TODOS LOS CAMPOS DEL EMPLEADO
-        console.log("Empleado:", empleado);
-        document.getElementById("namePromotor").innerHTML = empleado.nombre.toUpperCase();
-
-        alertSMS(`Marcación registrada correctamente para ${empleado.nombre}`);
-        formulario.reset();
-
-      } catch (err) {
-        console.error("Error general:", err);
-        alertSMS("No se pudo registrar la marcación");
-      } finally {
-        boton.disabled = false;
-        boton.classList.remove("disabled");
-      }
-    }
-
-   /********************************************************************************************************/
-    
-    function setDate(){ 
-      let date = new Date();      
-      let hora = date.toLocaleTimeString("es-CO", { hour12: false });  
-      let fecha = date.toLocaleDateString('es-CO');      
-      document.getElementById("fecha").value = fecha; //day+'-'+month+'-'+year;        
-      document.getElementById("hora").value = hora ;//hours+':'+minutes;    
-    }
-
-    /*************************************Guardar Imagen***************************************************/
-    function enviarFormularioConFetch() {
-      fetch(API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-        },
-        body: new URLSearchParams({
-          action: 'escribirDatosEnSheets', // Puedes cambiarlo según cómo lo procese tu backend
-          ...dataForm
-        })
-      })
-      .then(response => response.json())
-      .then(data => {
-        escribioHoja(data);
-      })
-      .catch(error => {
-        errorescrituraHoja(error);
-      });
-    }
-
-    function successFull(data){ //console.log("devuelta:" + data ); //console.log(data.url); 
-      document.getElementById("pathIMG").value = data.url;
-      document.getElementById("IDImg").value = data.fileID;    
-      dataForm = Object.fromEntries(new FormData(formulario).entries());   
-      enviarFormularioConFetch(dataForm); 
-    }
-
-    function errorUpload(data){ 
-      eliminarLoader();
-      document.getElementById("fecha").value = "";
-      document.getElementById("hora").value = "";//hours+':'+minutes; 
-      document.getElementById("coordenadas").value= "";
-      document.getElementById("mapa").value= "";
-      latitude='';
-      longitude='';
-    }
-    
-    function saveImage(){ 
-      if( nsModal.numClic > 0 ){
-        crearLoader(); 
-        let canvas = nsRegistro.getCanvas();
-        //let dataURi = canvas.toDataURL('image/png');
-        let dataURi = canvas.toDataURL('image/jpeg', 0.6);
-        let idImg = document.getElementById("codnomina").value + "-" + document.getElementById("fecha").value;  
-        subirImagen(dataURi,idImg,folderPathIMG);  
-      }
-      else{
-        alertSMS("La fotografía es necesaria");
-      }        
-    }//Fin función saveImage   
-
-    async function subirImagen(dataURI, idImg, folderPathIMG) {
-      try {
-        const response = await fetch(API_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-          },
-          body: new URLSearchParams({
-            action: 'doUpload',
-            data: dataURI,
-            idImg: idImg,
-            folderPathIMG: folderPathIMG
+            ubicacion,
+            fotoBase64
           })
         });
 
         const result = await response.json();
 
-        if (result.status) { 
-          successFull(result);  // llama tu función de éxito          
-        } else {
-          errorUpload("No se pudo subir la imagen"); //         
+        if (!response.ok) {
+          throw new Error(result.error || "Error al registrar marcación");
         }
 
-      } catch (error) {
-        console.error("Error en fetch:", error);
-        errorUpload(error.message || "Error en la conexión");
+        // ✅ respuesta correcta
+        document.getElementById("namePromotor").innerHTML =
+          result.empleado.nombre.toUpperCase();
+
+        alertSMS(`Marcación registrada correctamente para ${result.empleado.nombre}`);
+        formulario.reset();
+
+      } catch (err) {
+        console.error(err);
+        alertSMS(err.message);
+      } finally {
+        boton.disabled = false;
+        boton.classList.remove("disabled");
       }
-    }
-
-
-    function escribioHoja(datos) {
-      const { E1, S1, E2, S2, sms, existeMarcacion } = datos;
-      console.log("E1:", E1.estado, "Hora:", E1.hora);
-      console.log("S1:", S1.estado, "Hora:", S1.hora);
-      console.log("E2:", E2.estado, "Hora:", E2.hora);
-      console.log("S2:", S2.estado, "Hora:", S2.hora);
-      console.log("sms:", sms);
-      console.log("existeMarcacion:", existeMarcacion); 
-      // Asignar íconos usando estado
-      asignarIcono("e1", E1.estado);
-      asignarIcono("s1", S1.estado);
-      asignarIcono("e2", E2.estado);
-      asignarIcono("s2", S2.estado);
-
-      asignarHora("he1", E1.hora);
-      asignarHora("hs1", S1.hora);
-      asignarHora("he2", E2.hora);
-      asignarHora("hs2", S2.hora);
-
-      eliminarLoader();
-      clean();
-
-      if (sms !== "")
-        alertSMS( sms );
-      else if (existeMarcacion)
-        alertSMS("No se puede duplicar una entrada o salida");
-      else
-        alertSMS("Registro creado con éxito");
-    }
-
-    function asignarHora(id, hora) {
-      const div = document.getElementById(id);
-      if (div) {
-        div.innerText = hora || ""; // Asigna la hora o deja vacío si no hay hora
-      }
-    }   
-
-    function errorescrituraHoja(){
-      eliminarLoader();
-      alertSMS("No se pudieron registrar los datos vuelva a intentar"); 
     }
     
+    /*************************************Guardar Imagen***************************************************/
+    function dataURLtoBlob(dataurl) {
+      const arr = dataurl.split(',');
+      const mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) u8arr[n] = bstr.charCodeAt(n);
+      return new Blob([u8arr], { type: mime });
+    }    
+
+    function obtenerTipoRegistro() {
+      const seleccionado = document.querySelector(
+        'input[name="tiporegistro"]:checked'
+      );
+      return seleccionado ? seleccionado.value : null;
+    }
+
     /******************************************************************************************************/    
     
      function setCanvas(c) {
