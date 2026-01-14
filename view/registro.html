@@ -214,19 +214,23 @@ var nsRegistro=(function(){
         const fotoBase64 = canvas.toDataURL("image/jpeg", 0.6);
 
         // 🔥 enviar TODO a la Edge Function
-        const response = await fetch(`${SUPABASE_URL}/functions/v1/registrar_marcacion`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            codigo,
-            tipo_registro: tipoRegistro,
-            ubicacion,
-            fotoBase64
-          })
-        });
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/registrar_marcacion`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            }
+            // ⛔ NO body
+          }
+        );
 
         const result = await response.json();
-        console.log(result);
+        console.log("Respuesta Edge:", result);
+
+        alertSMS("Edge Function responde correctamente");
+        return; // ⛔ corta aquí para NO seguir con el flujo
+
 
         if (!response.ok) {
           throw new Error(result.error || "Error al registrar marcación");
