@@ -25,8 +25,6 @@ function getHome() {
   /******************************************************** */
 }
 
-
-
 function errorUpload(data) {
   alert("Error al generar el archivo");
 }
@@ -67,12 +65,13 @@ function getNomina() {
   main.appendChild(vmodal); 
 }
 
-function getConsulta() {  
+function getConsulta() {
   let main = document.getElementById('App');
   removeALLChilds(main);
-  const consulta = document.createElement('consulta-component');
-  consulta.setAttribute('container', '#App'); // <-- aquí pasas el parámetro
-  main.appendChild(consulta); 
+  const componente = document.createElement('consulta-component');
+  componente.setAttribute('container', '#App'); // <-- aquí pasas el parámetro 
+  main.appendChild(componente);
+  /******************************************************** */
 }
 
 async function getArrayPromotors() {
