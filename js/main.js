@@ -135,7 +135,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   /************Para forzar actualizacion de PWA**************/    
   setNavbarCollapse();
   getHome();
-  getArrayPromotors();
 });
 
 
