@@ -182,7 +182,7 @@ var nsRegistro=(function(){
     }
     /***************************************************************************************************************/
     /****************************************************procesarFormulario*****************************************/
-    async function procesarFormulario(event, formulario) {
+   async function procesarFormulario(event, formulario) {
       event.preventDefault();
 
       const boton = document.getElementById("frmSubmit");
@@ -209,28 +209,38 @@ var nsRegistro=(function(){
 
         const ubicacion = await getLocation();
 
-        // 📸 imagen desde canvas
+        // 📸 obtener imagen como BLOB desde canvas
         const canvas = nsRegistro.getCanvas();
-        const fotoBase64 = canvas.toDataURL("image/jpeg", 0.6);
+        const fotoBlob = await new Promise((resolve) => {
+          canvas.toBlob(
+            (blob) => resolve(blob),
+            "image/jpeg",
+            0.6
+          );
+        });
 
-        // 🔥 enviar TODO a la Edge Function (identificado con anon key)
+        if (!fotoBlob) {
+          throw new Error("No se pudo generar la imagen");
+        }
+
+        // 📦 construir FormData
+        const formData = new FormData();
+        formData.append("codigo", codigo);
+        formData.append("tipo_registro", tipoRegistro);
+        formData.append("ubicacion", JSON.stringify(ubicacion));
+        formData.append("foto", fotoBlob, "foto.jpg");
+
+        // 🔥 enviar a Edge Function
         const response = await fetch(
           `${SUPABASE_URL}/functions/v1/registrar_marcacion`,
           {
             method: "POST",
             headers: {
-              "Content-Type": "application/json",
-
-              // 🆔 identificación mínima requerida por Supabase
+              // ❌ NO pongas Content-Type aquí
               "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
               "apikey": SUPABASE_ANON_KEY
             },
-            body: JSON.stringify({
-              codigo,
-              tipo_registro: tipoRegistro,
-              ubicacion,
-              fotoBase64
-            })
+            body: formData
           }
         );
 
