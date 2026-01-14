@@ -73,29 +73,6 @@ function getConsulta() {
   /******************************************************** */
 }
 
-async function getArrayPromotors() {
-  try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-      },
-      body: new URLSearchParams({ action: 'getPromotoresYUrl' })
-    });
-
-    const data = await response.json();
-
-    if (data.status === 'success') {
-      arrayGlobal = data.data.promotores; // Promotores
-      folderPathIMG = data.data.urlImagenes; // URL de imágenes      
-    } else {
-      console.log(data.mensaje || "Error al obtener promotores");
-    }
-  } catch (error) {
-    console.error('Error:', error);
-  }
-}
-
 function crearLoader() {
   eliminarLoader();
   let containerloader = document.createElement('div');
