@@ -48,17 +48,6 @@
                   <input type="number" class="form-control" id="codnomina" name="codnomina">
                   <span id="namePromotor" class="form-text text-muted"></span>
                 </div>
-
-                <div class="mb-3" style="display: block;">
-                  <label for="fecha" class="form-label">Fecha</label>
-                  <input type="text" class="form-control" id="fecha" name="fecha" readonly>
-                </div>
-
-                <div class="mb-3" style="display: block;">
-                  <label for="hora" class="form-label">Hora</label>
-                  <input type="text" class="form-control" id="hora" name="hora" readonly>
-                </div>
-
                 <div class="row mb-3">
                   <div class="col-md-6 mb-2">
                     <input type="radio" class="btn-check" name="tiporegistro" id="rbtEntrada" value="ENTRADA" autocomplete="off" checked>
@@ -75,10 +64,7 @@
                 <div class="mb-3" style="display: block;">
                   <label for="ubicacion" class="form-label">Ubicación</label>
                   <input type="text" class="form-control" id="coordenadas" name="coordenadas" readonly>
-                  <!-- Campos ocultos para la imagen y mapa -->
-                  <input id="pathIMG" name="pathIMG">
-                  <input id="IDImg" name="IDImg">
-                  <input id="mapa" name="mapa">
+                  <!-- Campos ocultos para la imagen y mapa --> 
                 </div> 
               </div>              
               <div class="card-footer d-flex gap-2">
@@ -241,12 +227,12 @@ var nsRegistro=(function(){
         const result = await response.json();
 
         if (!response.ok) {
+          document.getElementById("namePromotor").textContent = "";
           throw new Error(result.error || "Error al registrar marcación");
         }
 
         // ✅ respuesta correcta
-        document.getElementById("namePromotor").innerHTML =
-          result.empleado.nombre.toUpperCase();
+        document.getElementById("namePromotor").innerHTML = result.empleado.nombre.toUpperCase();
 
         alertSMS(
           `Marcación registrada correctamente para ${result.empleado.nombre}`
@@ -256,8 +242,7 @@ var nsRegistro=(function(){
         // ✅ RESET TOTAL (CLAVE)
         // ==========================
         nsModal.reset();      // limpia canvas + numClic = 0
-        formulario.reset();  // limpia inputs
-        document.getElementById("namePromotor").textContent = "";
+        formulario.reset();  // limpia inputs        
 
       } catch (err) {
         console.error(err);
