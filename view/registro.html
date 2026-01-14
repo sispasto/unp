@@ -213,26 +213,29 @@ var nsRegistro=(function(){
         const canvas = nsRegistro.getCanvas();
         const fotoBase64 = canvas.toDataURL("image/jpeg", 0.6);
 
-        // 🔥 enviar TODO a la Edge Function
+        // 🔥 enviar TODO a la Edge Function (identificado con anon key)
         const response = await fetch(
           `${SUPABASE_URL}/functions/v1/registrar_marcacion`,
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+
+              // 🆔 identificación mínima requerida por Supabase
               "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
               "apikey": SUPABASE_ANON_KEY
-            }
+            },
+            body: JSON.stringify({
+              codigo,
+              tipo_registro: tipoRegistro,
+              ubicacion,
+              fotoBase64
+            })
           }
         );
-        
-        /*hola*/
+
         const result = await response.json();
-        console.log("Respuesta Edge:", result);
-
-        alertSMS("Edge Function responde correctamente");
-        return; // ⛔ corta aquí para NO seguir con el flujo
-
+        console.log(result);
 
         if (!response.ok) {
           throw new Error(result.error || "Error al registrar marcación");
@@ -242,7 +245,10 @@ var nsRegistro=(function(){
         document.getElementById("namePromotor").innerHTML =
           result.empleado.nombre.toUpperCase();
 
-        alertSMS(`Marcación registrada correctamente para ${result.empleado.nombre}`);
+        alertSMS(
+          `Marcación registrada correctamente para ${result.empleado.nombre}`
+        );
+
         formulario.reset();
 
       } catch (err) {
@@ -253,7 +259,7 @@ var nsRegistro=(function(){
         boton.classList.remove("disabled");
       }
     }
-    
+
     /*************************************Guardar Imagen***************************************************/
     function dataURLtoBlob(dataurl) {
       const arr = dataurl.split(',');
