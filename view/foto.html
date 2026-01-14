@@ -53,24 +53,34 @@
     const snap = document.getElementById('snap');
     const canvas = document.getElementById('canvas');
 
-    document.addEventListener('click', function(e) { 
+    // ==========================
+    // ABRIR CÁMARA DESDE BOTÓN
+    // ==========================
+    document.addEventListener('click', function (e) {
       if (e.target && e.target.id === 'opencamera') {
         openCamera();
       }
     });
 
+    // ==========================
+    // TOMAR FOTO
+    // ==========================
     snap.addEventListener('click', function () {
       const context = canvas.getContext('2d');
+
       canvas.width = 320;
       canvas.height = 240;
+
       context.drawImage(video, 0, 0, 320, 240);
 
-      nsRegistro.setCanvas(canvas);
-      numClic = 1; // ✅ foto tomada
+      numClic = 1; // ✅ foto tomada correctamente
     });
 
-    myModalEl.addEventListener('hidden.bs.modal', function () {        
-      if (objCamera != null) {
+    // ==========================
+    // CERRAR MODAL
+    // ==========================
+    myModalEl.addEventListener('hidden.bs.modal', function () {
+      if (objCamera) {
         objCamera.getTracks().forEach(track => track.stop());
         objCamera = null;
       }
@@ -86,6 +96,7 @@
 
     async function init() {
       if (objCamera) return;
+
       try {
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
         handleSuccess(stream);
@@ -114,7 +125,7 @@
     }
 
     // ==========================
-    // ✅ FUNCIÓN RESET (LA CLAVE)
+    // ✅ RESET TOTAL
     // ==========================
     function reset() {
       numClic = 0;
@@ -123,17 +134,24 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
+    // ==========================
+    // API PÚBLICA DEL MÓDULO
+    // ==========================
     function getNumClic() {
       return numClic;
+    }
+
+    function getCanvas() {
+      return canvas;
     }
 
     return {
       openCamera,
       reset,
       getNumClic,
-      getCanvas: () => canvas
+      getCanvas
     };
-
   })();
 </script>
+
 
