@@ -57,6 +57,9 @@
     let currentPage = 1;
     let recordsPerPage = 8;
     let dataTable = [];
+    const SUPABASE_URL = "https://pmbxyfketmuzocepllvf.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtYnh5ZmtldG11em9jZXBsbHZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3ODE4NjUsImV4cCI6MjA3MzM1Nzg2NX0.oh9zssayvCPp-jcCohQugTx28Ds2Ts-y7Tbp-pgX1XE";
+
 
     function consultarDatos() {
 
@@ -81,16 +84,17 @@
 
     async function obtenerDatosPorRango(fechaInicial, fechaFinal) {
       try {
-        const response = await fetch(API_URL, {
+         const response = await fetch(`${SUPABASE_URL}/functions/v1/marcaciones_historico`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-          },
-          body: new URLSearchParams({
-            action: 'filtrarFechasPorRango',
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+          }, 
+          body: JSON.stringify({
+            action: "filtrarFechasPorRango",
             fechaInicial: fechaInicial,
             fechaFinal: fechaFinal
-          })
+          })          
         });
 
         const data = await response.json();
