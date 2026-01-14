@@ -36,7 +36,6 @@
               </div>
               <div class="card-body">
                 <div class="text-center mb-4">
-                  <!-- Botón actualizado: elimina data-bs-toggle y data-bs-target -->
                   <button type="button" class="btn btn-dark" id="opencamera">
                     <i class="bi bi-camera-fill"></i>
                   </button>
@@ -80,28 +79,20 @@
 
 <script>
   // ==========================
-  // Función para abrir la cámara (foto-component)
+  // Abrir cámara usando foto-component
   // ==========================
-  function initCameraButton() {
-    const btnCamera = document.getElementById('opencamera');
-    if (btnCamera) {
-      btnCamera.addEventListener('click', () => {
-        const fotoComp = document.querySelector('foto-component');
-        if (fotoComp) {
-          fotoComp.openCamera(); // Abre el modal dinámico
-        } else {
-          console.error("FotoComponent no encontrado en la página");
-        }
-      });
+  const btnCamera = document.getElementById('opencamera');
+  btnCamera?.addEventListener('click', () => {
+    const fotoComp = document.querySelector('foto-component');
+    if (fotoComp) {
+      fotoComp.openCamera(); // Abrir modal de cámara
+    } else {
+      console.error("FotoComponent no encontrado en la página");
     }
-  }
-
-  // Llamamos inmediatamente ya que el script está al final del body
-  initCameraButton();
-
+  });
 
   // ==========================
-  // Módulo nsRegistro
+  // Módulo nsRegistro actualizado
   // ==========================
   var nsRegistro = (function() {
     const SUPABASE_URL = "https://pmbxyfketmuzocepllvf.supabase.co";
@@ -109,7 +100,7 @@
 
     let latitude = '';
     let longitude = '';
-    let options = { enableHighAccuracy: true, timeout: 30000, maximumAge: 27000 };
+    const options = { enableHighAccuracy: true, timeout: 30000, maximumAge: 27000 };
 
     async function getLocation() {
       return new Promise((resolve, reject) => {
@@ -146,10 +137,14 @@
         const tipoRegistro = obtenerTipoRegistro();
         if (!tipoRegistro) return alertSMS("Seleccione el tipo de registro");
 
-        if (nsModal.getNumClic() <= 0) return alertSMS("La fotografía es obligatoria");
+        const fotoComp = document.querySelector('foto-component');
+        if (!fotoComp) throw new Error("FotoComponent no cargado");
+
+        if (fotoComp.getNumClic() <= 0) return alertSMS("La fotografía es obligatoria");
 
         const ubicacion = await getLocation();
-        const canvas = nsModal.getCanvas();
+
+        const canvas = fotoComp.getCanvas();
         const fotoBlob = await new Promise(resolve => canvas.toBlob(blob => resolve(blob), "image/jpeg", 0.6));
         if (!fotoBlob) throw new Error("No se pudo generar la imagen");
 
@@ -174,7 +169,8 @@
         document.getElementById("namePromotor").innerHTML = result.empleado.nombre.toUpperCase();
         alertSMS(`Marcación registrada correctamente para ${result.empleado.nombre}`);
 
-        nsModal.reset();
+        // Limpiar canvas y formulario
+        fotoComp.reset();
         formulario.reset();
 
       } catch (err) {
