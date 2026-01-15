@@ -134,7 +134,7 @@
     let paginatedData = dataTable.slice(start, end);
 
     paginatedData.forEach(elemento => {           
-      let URLimg = `'https://drive.google.com/thumbnail?id=${elemento.foto}'`;
+      let URLimg = `'${elemento.foto}'`;
       html += `<tr class="table table-striped">
                 <td>${elemento.nombre}</td>
                 <td>${elemento.fecha}</td>
@@ -144,10 +144,12 @@
                   <a href="#" onclick="nsNomina.mostrarFoto(${URLimg})"><i class="bi bi-image"></i></a>            
                 </td>                 
                 <td style="text-align:center;">
-                  <a href="#" onclick="nsNomina.geolocalizar('${elemento.ubicacion}')"><i class="bi bi-geo-alt-fill"></i></a>
+                  <a href="#" onclick="nsNomina.geolocalizar('https://www.google.com/maps?q=${elemento.ubicacion}')"><i class="bi bi-geo-alt-fill"></i></a>
                 </td>
               </tr>`;
     });
+
+    
 
     mainTable.innerHTML = html;
     eliminarLoader();
