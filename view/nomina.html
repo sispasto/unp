@@ -100,6 +100,7 @@
         const data = await response.json();
 
         if (data.status === 'success') {
+          console.log( data.data );
           success(data.data);       
           eliminarLoader();
         } else {
@@ -118,40 +119,41 @@
       updateTable();     // Mostrar la tabla con paginación
     }
 
-    function updateTable() {
-      let containerTabla = document.getElementById('containerTabla');
-      removeALLChilds(containerTabla);
-      
-      let tabla = document.getElementById('plantillaTabla'); 
-      containerTabla.appendChild(tabla.content.cloneNode(true)); 
+   function updateTable() {
+    let containerTabla = document.getElementById('containerTabla');
+    removeALLChilds(containerTabla);
+    
+    let tabla = document.getElementById('plantillaTabla'); 
+    containerTabla.appendChild(tabla.content.cloneNode(true)); 
 
-      let mainTable = document.getElementById("mainTable");
-      let html = '';
+    let mainTable = document.getElementById("mainTable");
+    let html = '';
 
-      let start = (currentPage - 1) * recordsPerPage;
-      let end = start + recordsPerPage;
-      let paginatedData = dataTable.slice(start, end);
+    let start = (currentPage - 1) * recordsPerPage;
+    let end = start + recordsPerPage;
+    let paginatedData = dataTable.slice(start, end);
 
-      paginatedData.forEach(elemento => {           
-        let URLimg = `'https://drive.google.com/thumbnail?id=${elemento[8]}'`;
-        html += `<tr class="table table-striped">
-                  <td>${elemento[0]}</td>
-                  <td>${elemento[2]}</td>
-                  <td>${elemento[4]}</td>
-                  <td>${elemento[3]}</td>
-                  <td style="text-align:center;">                
-                    <a href="#" onclick="nsNomina.mostrarFoto(${URLimg})"><i class="bi bi-image"></i></a>            
-                  </td>                 
-                  <td style="text-align:center;">
-                    <a href="#" onclick="nsNomina.geolocalizar('${elemento[7]}')"><i class="bi bi-geo-alt-fill"></i></a>
-                  </td>
-                </tr>`;
-      });
+    paginatedData.forEach(elemento => {           
+      let URLimg = `'https://drive.google.com/thumbnail?id=${elemento.foto}'`;
+      html += `<tr class="table table-striped">
+                <td>${elemento.nombre}</td>
+                <td>${elemento.fecha}</td>
+                <td>${elemento.tipo_registro}</td>
+                <td>${elemento.hora}</td>
+                <td style="text-align:center;">                
+                  <a href="#" onclick="nsNomina.mostrarFoto(${URLimg})"><i class="bi bi-image"></i></a>            
+                </td>                 
+                <td style="text-align:center;">
+                  <a href="#" onclick="nsNomina.geolocalizar('${elemento.ubicacion}')"><i class="bi bi-geo-alt-fill"></i></a>
+                </td>
+              </tr>`;
+    });
 
-      mainTable.innerHTML = html;
-      eliminarLoader();
-      createPagination();
-    }
+    mainTable.innerHTML = html;
+    eliminarLoader();
+    createPagination();
+  }
+
 
     function createPagination() {
       let pagination = document.getElementById("pagination");
