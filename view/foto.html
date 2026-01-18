@@ -52,16 +52,7 @@
     const video = document.getElementById('video');
     const snap = document.getElementById('snap');
     const canvas = document.getElementById('canvas');
-
-    // ==========================
-    // ABRIR CÁMARA DESDE BOTÓN
-    // ==========================
-    document.addEventListener('click', function (e) {
-      if (e.target && e.target.id === 'opencamera') {
-        openCamera();
-      }
-    });
-
+    
     // ==========================
     // TOMAR FOTO
     // ==========================
@@ -79,7 +70,7 @@
     // ==========================
     // CERRAR MODAL
     // ==========================
-    myModalEl.addEventListener('hidden.bs.modal', function () {
+    myModalEl.addEventListener('hidden.bs.modal', function () { 
       if (objCamera) {
         objCamera.getTracks().forEach(track => track.stop());
         objCamera = null;
@@ -118,11 +109,6 @@
 
     myModalEl.addEventListener('shown.bs.modal', init);
 
-    function openCamera() {
-      const bsModal = new bootstrap.Modal(myModalEl);
-      bsModal.show();
-    }
-
     // ==========================
     // ✅ RESET TOTAL
     // ==========================
@@ -144,8 +130,7 @@
       return canvas;
     }
 
-    return {
-      openCamera,
+    return {      
       reset,
       getNumClic,
       getCanvas
