@@ -1,7 +1,7 @@
 const templateCache = {};
 var arrayGlobal = []; //array de promotores
 var folderPathIMG="";//variable que guarda id de carpeta donde se guardan las imagenes
-var versionApp="1.7";//La version se debe cambiar en service-worker.js y aqui
+var versionApp="1.8";//La version se debe cambiar en service-worker.js y main.js
 
 function getRegistro() {
   let main = document.getElementById('App');
