@@ -73,6 +73,22 @@ function getConsulta() {
   /******************************************************** */
 }
 
+function acercade() {
+  let main = document.getElementById('App');
+  removeALLChilds(main);
+
+  const componente = document.createElement('acercade-component');
+  componente.setAttribute('container', '#App');
+
+  // 🔹 PASAR DATOS AL COMPONENTE
+  componente.versionApp = versionApp;
+  componente.fechaInicio = '01/01/2026';
+  componente.fechaFin = '31/12/2026';
+
+  main.appendChild(componente);
+}
+
+
 function crearLoader() {
   eliminarLoader();
   let containerloader = document.createElement('div');
