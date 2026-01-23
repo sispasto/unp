@@ -1,0 +1,128 @@
+<style>
+  .tabla-personas {
+    font-size: 0.9rem;
+  }
+</style>
+
+<div class="container-fluid mt-3">
+
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-10">
+
+      <div class="card shadow border-0">
+
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0 fw-bold">Consulta de Personas</h5>
+          <input
+            type="text"
+            class="form-control form-control-sm w-50"
+            placeholder="Buscar por código, cédula o nombre"
+            onkeyup="nsConsultarPersonas.filtrar(this.value)"
+          >
+        </div>
+
+        <div class="card-body p-0">
+
+          <div id="alertaConsulta" class="p-3"></div>
+
+          <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0 tabla-personas">
+              <thead class="table-dark">
+                <tr>
+                  <th>Código</th>
+                  <th>Cédula</th>
+                  <th>Nombre</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyPersonas"></tbody>
+            </table>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+var nsConsultarPersonas = (function () {
+
+  const ENDPOINT =
+    "https://pmbxyfketmuzocepllvf.supabase.co/functions/v1/consultar_personas";
+
+  let personas = [];
+
+  async function cargar() {
+    try {
+      const res = await fetch(ENDPOINT, { method: "POST" });
+      const result = await res.json();
+
+      if (!res.ok) throw new Error(result.error);
+
+      personas = result.data;
+      render(personas);
+
+    } catch (err) {
+      mostrarError(err.message);
+    }
+  }
+
+  function render(data) {
+    const tbody = document.getElementById("tbodyPersonas");
+    tbody.innerHTML = "";
+
+    if (!data.length) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="4" class="text-center text-muted py-3">
+            No hay registros
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    data.forEach(p => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${p.codigo}</td>
+          <td>${p.cedula}</td>
+          <td>${p.nombre}</td>
+          <td>
+            <span class="badge ${p.estado ? "bg-success" : "bg-secondary"}">
+              ${p.estado ? "ACTIVO" : "INACTIVO"}
+            </span>
+          </td>
+        </tr>
+      `;
+    });
+  }
+
+  function filtrar(txt) {
+    txt = txt.toLowerCase();
+    render(
+      personas.filter(p =>
+        p.codigo.toLowerCase().includes(txt) ||
+        p.cedula.toLowerCase().includes(txt) ||
+        p.nombre.toLowerCase().includes(txt)
+      )
+    );
+  }
+
+  function mostrarError(msg) {
+    document.getElementById("alertaConsulta").innerHTML = `
+      <div class="alert alert-danger">${msg}</div>
+    `;
+  }
+
+  return {
+    cargar,
+    filtrar
+  };
+
+})();
+</script>
