@@ -14,6 +14,14 @@ function getRegistro() {
   main.appendChild(foto); 
 }
 
+function registrarPersona() {
+  let main = document.getElementById('App');
+  removeALLChilds(main);
+  const registroPersona = document.createElement('registro-persona-component');
+  registroPersona.setAttribute('container', '#App'); // <-- aquí pasas el parámetro
+  main.appendChild(registroPersona); 
+}
+
 function getHome() {
   let main = document.getElementById('App');
   removeALLChilds(main);
@@ -23,6 +31,19 @@ function getHome() {
   main.appendChild(componente);
   /******************************************************** */
 }
+
+function acercade() {
+  let main = document.getElementById('App');
+  removeALLChilds(main);
+  const componente = document.createElement('acercade-component');
+  componente.setAttribute('container', '#App'); // <-- aquí pasas el parámetro
+  componente.versionApp = versionApp; // <-- Aquí se pasa la versión antes de renderizar
+  componente.fecInicial="19/01/2026"; // <-- Aquí se pasa la fecha inicial antes de renderizar
+  componente.fecFinal="19/01/2027"; // <-- Aquí se pasa la fecha final antes de renderizar
+  main.appendChild(componente);
+  /******************************************************** */
+}
+
 
 function errorUpload(data) {
   alert("Error al generar el archivo");
@@ -72,22 +93,6 @@ function getConsulta() {
   main.appendChild(componente);
   /******************************************************** */
 }
-
-function acercade() {
-  let main = document.getElementById('App');
-  removeALLChilds(main);
-
-  const componente = document.createElement('acercade-component');
-  componente.setAttribute('container', '#App');
-
-  // 🔹 PASAR DATOS AL COMPONENTE
-  componente.versionApp = versionApp;
-  componente.fechaInicio = '01/01/2026';
-  componente.fechaFin = '31/12/2026';
-
-  main.appendChild(componente);
-}
-
 
 function crearLoader() {
   eliminarLoader();

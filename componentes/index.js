@@ -5,3 +5,5 @@ import'./informe.js';
 import'./vmodal.js';
 import'./nomina.js';
 import'./consulta.js';
+import'./acercade.js';
+import'./registroPersona.js';

@@ -51,11 +51,11 @@
                     </li>
                     <!-- Registrar -->
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="getRegistro();"><i class="bi bi-pencil-square"> Registrar</i></a>
+                        <a class="nav-link" href="#" onclick="getRegistro();"><i class="bi bi-pencil-square"> Registrar Asistencia</i></a>
                     </li>   
                     <!-- Consultar -->
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="getConsulta();"><i class="bi bi-pencil-square"> Consultar</i></a>
+                        <a class="nav-link" href="#" onclick="getConsulta();"><i class="bi bi-pencil-square"> Consultar marcaciones</i></a>
                     </li>                                    
                     <!-- Login Button -->
                     <li class="nav-item" id="loginNavItem">
@@ -93,7 +93,7 @@
                     </li>
                     <!-- Registrar Persona -->
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="registrar();"><i class="bi bi-key"> Registrar persona</i></a>
+                        <a class="nav-link" href="#" onclick="registrarPersona();"><i class="bi bi-key"> Registrar persona</i></a>
                     </li> 
                     <!-- Histórico por fechas -->                    
                     <li class="nav-item">
@@ -204,6 +204,7 @@ function showChangePasswordModal() {
   new bootstrap.Modal(document.getElementById('changePasswordModal')).show();
 }
 
+
 // ============================
 // LOGIN
 // ============================
@@ -310,7 +311,7 @@ async function updatePassword() {
 // ============================
 // CERRAR SESIÓN
 // ============================
-function logout() {
+function logout(){
   document.getElementById('navbarItemsDefault').style.display = 'block';
   document.getElementById('navbarItemsUser').style.display = 'none';
   document.getElementById('navbarItemsAdmin').style.display = 'none';

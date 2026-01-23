@@ -1,11 +1,11 @@
-class AcercaDeComponent extends HTMLElement {
+class AcercadeComponent extends HTMLElement {
   constructor() {
     super();
-    // Shadow DOM deshabilitado por compatibilidad con estilos globales
+    //this.attachShadow({ mode: 'open' }); Encapsula todo independiente todo css y js por eso lo comente
   }
 
   async connectedCallback() {
-    const containerSelector = this.getAttribute('container');
+    const containerSelector = this.getAttribute('container'); //|| '#App';
     const container = document.querySelector(containerSelector);
 
     if (!container) {
@@ -17,18 +17,20 @@ class AcercaDeComponent extends HTMLElement {
       const response = await fetch('view/acercade.html');
       const htmlText = await response.text();
 
+      // Crear un template para manipular el contenido
       const template = document.createElement('template');
       template.innerHTML = htmlText;
 
       // Extraer scripts
       const scripts = template.content.querySelectorAll('script');
-      scripts.forEach(script => script.remove());
+      scripts.forEach(script => script.remove()); // Remover antes de clonar
 
-      // Limpiar contenido actual
+      // Insertar el contenido HTML en el shadow DOM
+      //this.shadowRoot.appendChild(template.content.cloneNode(true));Encapsula todo independiente todo css y js por eso lo comente
       this.innerHTML = '';
       this.appendChild(template.content.cloneNode(true));
+      /* ========= INSERTAR DATOS ========= */
 
-      // Insertar versión
       if (this.versionApp) {
         const versionLabel = this.querySelector('#version-label');
         if (versionLabel) {
@@ -36,21 +38,19 @@ class AcercaDeComponent extends HTMLElement {
         }
       }
 
-      // Insertar fechas de licencia
-      if (this.fechaInicio) {
-        const fi = this.querySelector('#fecha-inicio');
-        if (fi) fi.textContent = this.fechaInicio;
+      if (this.fecInicial) {
+        const ini = this.querySelector('#fecha-inicio');
+        if (ini) ini.textContent = this.fecInicial;
       }
 
-      if (this.fechaFin) {
-        const ff = this.querySelector('#fecha-fin');
-        if (ff) ff.textContent = this.fechaFin;
+      if (this.fecFinal) {
+        const fin = this.querySelector('#fecha-fin');
+        if (fin) fin.textContent = this.fecFinal;
       }
-
-      // Limpiar scripts previos
+      // Limpiar scripts anteriores en el contenedor
       container.querySelectorAll('script[data-dynamic="true"]').forEach(s => s.remove());
 
-      // Reinsertar scripts
+      // Insertar los scripts dinámicamente en el contenedor
       scripts.forEach(oldScript => {
         const newScript = document.createElement('script');
         if (oldScript.src) {
@@ -58,38 +58,38 @@ class AcercaDeComponent extends HTMLElement {
         } else {
           newScript.textContent = oldScript.textContent;
         }
-        newScript.setAttribute('data-dynamic', 'true');
+        newScript.setAttribute('data-dynamic', 'true'); // para poder eliminarlos luego
         container.appendChild(newScript);
       });
 
     } catch (error) {
-      console.error('Error al cargar acercade.html:', error);
+      console.error('Error al cargar bienvenida.html:', error);
     }
   }
+
+  /* ========= PROPIEDADES ========= */
 
   set versionApp(value) {
     this._versionApp = value;
   }
-
   get versionApp() {
     return this._versionApp;
   }
 
-  set fechaInicio(value) {
-    this._fechaInicio = value;
+  set fecInicial(value) {
+    this._fecInicial = value;
+  }
+  get fecInicial() {
+    return this._fecInicial;
   }
 
-  get fechaInicio() {
-    return this._fechaInicio;
+  set fecFinal(value) {
+    this._fecFinal = value;
   }
-
-  set fechaFin(value) {
-    this._fechaFin = value;
+  get fecFinal() {
+    return this._fecFinal;
   }
-
-  get fechaFin() {
-    return this._fechaFin;
-  }
+  
 }
 
-customElements.define('acercade-component', AcercaDeComponent);
+customElements.define('acercade-component', AcercadeComponent);
