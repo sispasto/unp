@@ -1,7 +1,7 @@
 const templateCache = {};
 var arrayGlobal = []; //array de promotores
 var folderPathIMG="";//variable que guarda id de carpeta donde se guardan las imagenes
-var versionApp="1.8";//La version se debe cambiar en service-worker.js y main.js
+var versionApp="1.9";//La version se debe cambiar en service-worker.js y main.js
 
 function getRegistro() {
   let main = document.getElementById('App');
@@ -20,6 +20,14 @@ function registrarPersona() {
   const registroPersona = document.createElement('registro-persona-component');
   registroPersona.setAttribute('container', '#App'); // <-- aquí pasas el parámetro
   main.appendChild(registroPersona); 
+}
+
+function consultarPersona() {
+  let main = document.getElementById('App');
+  removeALLChilds(main);
+  const consultarPersona = document.createElement('consultar-persona');
+  consultarPersona.setAttribute('container', '#App'); // <-- aquí pasas el parámetro
+  main.appendChild(consultarPersona); 
 }
 
 function getHome() {

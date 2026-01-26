@@ -51,19 +51,36 @@
 <script>
 var nsConsultarPersonas = (function () {
 
-  const ENDPOINT =
-    "https://pmbxyfketmuzocepllvf.supabase.co/functions/v1/consultar_personas";
-
+  /***********************************************/
+  const SUPABASE_URL = "https://pmbxyfketmuzocepllvf.supabase.co";
+  const SUPABASE_ANON_KEY =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtYnh5ZmtldG11em9jZXBsbHZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3ODE4NjUsImV4cCI6MjA3MzM1Nzg2NX0.oh9zssayvCPp-jcCohQugTx28Ds2Ts-y7Tbp-pgX1XE";
+  /***********************************************/
   let personas = [];
 
   async function cargar() {
     try {
-      const res = await fetch(ENDPOINT, { method: "POST" });
+      
+      const res = await fetch(
+        `${SUPABASE_URL}/functions/v1/consultar_personas`,
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "apikey": SUPABASE_ANON_KEY
+          },
+          body: JSON.stringify({}) // 👈 OBLIGATORIO
+        }
+      );
+
       const result = await res.json();
 
-      if (!res.ok) throw new Error(result.error);
+      if (!res.ok) throw new Error(result.error || "Error al consultar personas");
 
-      personas = result.data;
+      personas = result.data.sort(
+        (a, b) => Number(a.codigo) - Number(b.codigo)
+      );
+
       render(personas);
 
     } catch (err) {
@@ -104,14 +121,19 @@ var nsConsultarPersonas = (function () {
 
   function filtrar(txt) {
     txt = txt.toLowerCase();
-    render(
-      personas.filter(p =>
-        p.codigo.toLowerCase().includes(txt) ||
-        p.cedula.toLowerCase().includes(txt) ||
-        p.nombre.toLowerCase().includes(txt)
-      )
+
+    const filtradas = personas.filter(p =>
+      String(p.codigo).includes(txt) ||
+      String(p.cedula).includes(txt) ||
+      p.nombre.toLowerCase().includes(txt)
     );
+
+    // Mantener orden numérico después del filtro
+    filtradas.sort((a, b) => Number(a.codigo) - Number(b.codigo));
+
+    render(filtradas);
   }
+
 
   function mostrarError(msg) {
     document.getElementById("alertaConsulta").innerHTML = `
@@ -125,4 +147,11 @@ var nsConsultarPersonas = (function () {
   };
 
 })();
+
+// 👇 ejecutar automáticamente
+document.addEventListener("DOMContentLoaded", () => {
+  nsConsultarPersonas.cargar();
+});
 </script>
+
+
