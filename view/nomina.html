@@ -1,141 +1,182 @@
-  <div>  
-    <div class="container-fluid">     
-       <h3></h3><!--este es el espacio-->  
-      <form id="frmInforme">
-        <div class="container-fluid p-0 m-0">
-          <div class="card shadow border-0">
-            <div class="card-header bg-dark text-white d-flex align-items-center" style="height: 3rem;">
-              <h5 class="card-title mb-0 fw-bold">Informe por Fechas</h5>
+<div>
+  <div class="container-fluid">
+    <h3></h3>
+    <form id="frmInforme">
+      <div class="container-fluid p-0 m-0">
+        <div class="card shadow border-0">
+          <div
+            class="card-header bg-dark text-white d-flex align-items-center"
+            style="height: 3rem"
+          >
+            <h5 class="card-title mb-0 fw-bold">Informe por Fechas</h5>
+          </div>
+          <div class="card-body">
+            <div class="row mb-3">
+              <div class="col-sm">
+                <label for="fechaInicio" class="form-label"
+                  >Fecha Inicial</label
+                >
+                <input
+                  type="date"
+                  class="form-control"
+                  id="fechaInicio"
+                  name="fechaInicio"
+                />
+              </div>
+              <div class="col-sm">
+                <label for="fechaFinal" class="form-label">Fecha Final</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  id="fechaFinal"
+                  name="fechaFinal"
+                />
+              </div>
             </div>
-            <div class="card-body">
-              <div class="row mb-3">
-                <div class="col-sm">
-                  <label for="fechaInicio" class="form-label">Fecha Inicial</label>
-                  <input type="date" class="form-control" id="fechaInicio" name="fechaInicio">   
-                </div>           
-                <div class="col-sm">
-                  <label for="fechaFinal" class="form-label">Fecha Final</label>
-                  <input type="date" class="form-control" id="fechaFinal" name="fechaFinal">
-                </div>
-              </div>
-              
-              <div class="text-end">
-                <button type="button" class="btn btn-primary" id="consultar" onclick="nsNomina.consultarDatos()">Consultar</button>
-                <!--<button type="button" class="btn btn-success" onclick="nsNomina.generarCSV()"><i class="bi bi-file-earmark-excel"></i></button>-->
-              </div>
+
+            <div class="text-end">
+              <button
+                type="button"
+                class="btn btn-primary"
+                id="consultar"
+                onclick="nsNomina.consultarDatos()"
+              >
+                Consultar
+              </button>
+              <button
+                type="button"
+                class="btn btn-success"
+                id="descargarReporte"
+                onclick="nsNomina.generarCSV()"
+              >
+                <i class="bi bi-file-earmark-excel"></i> Descargar Reporte
+              </button>
             </div>
-            <div class="container-fluid">
-              <div id="containerTabla" class="d-flex justify-content-center"></div>
-              <div class="d-flex justify-content-center mt-3 overflow-auto" style="max-width: 100%;">
-                <div id="pagination" class="d-flex flex-wrap justify-content-center"></div>
-              </div>
-            </div>        
+          </div>
+          <div class="container-fluid">
+            <div
+              id="containerTabla"
+              class="d-flex justify-content-center"
+            ></div>
+            <div
+              class="d-flex justify-content-center mt-3 overflow-auto"
+              style="max-width: 100%"
+            >
+              <div
+                id="pagination"
+                class="d-flex flex-wrap justify-content-center"
+              ></div>
+            </div>
           </div>
         </div>
-      </form>      
-    </div>  
-  </div> 
-  <template id="plantillaTabla">
-    <div style="overflow-x: auto; width: 100%;">
-      <table class="table table-dark table-striped table-bordered mb-0" style="min-width: 600px;">
-        <thead>
-          <tr>
-            <th scope="col">Nombre</th>
-            <th scope="col">Día</th>
-            <th scope="col">Tipo Registro</th>
-            <th scope="col">Hora</th>
-            <th scope="col">Foto</th>
-            <th scope="col">Ubicación</th>
-          </tr>
-        </thead>
-        <tbody id="mainTable"></tbody>
-      </table>
-    </div>
-  </template>
-  <script>     
-  var nsNomina = (function() { 
+      </div>
+    </form>
+  </div>
+</div>
+
+<template id="plantillaTabla">
+  <div style="overflow-x: auto; width: 100%">
+    <table
+      class="table table-dark table-striped table-bordered mb-0"
+      style="min-width: 600px"
+    >
+      <thead>
+        <tr>
+          <th scope="col">Nombre</th>
+          <th scope="col">Día</th>
+          <th scope="col">Tipo Registro</th>
+          <th scope="col">Hora</th>
+          <th scope="col">Foto</th>
+          <th scope="col">Ubicación</th>
+        </tr>
+      </thead>
+      <tbody id="mainTable"></tbody>
+    </table>
+  </div>
+</template>
+
+<script>
+  var nsNomina = (function () {
     let currentPage = 1;
     let recordsPerPage = 8;
     let dataTable = [];
     const SUPABASE_URL = "https://pmbxyfketmuzocepllvf.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtYnh5ZmtldG11em9jZXBsbHZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3ODE4NjUsImV4cCI6MjA3MzM1Nzg2NX0.oh9zssayvCPp-jcCohQugTx28Ds2Ts-y7Tbp-pgX1XE";
-
+    const SUPABASE_ANON_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtYnh5ZmtldG11em9jZXBsbHZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3ODE4NjUsImV4cCI6MjA3MzM1Nzg2NX0.oh9zssayvCPp-jcCohQugTx28Ds2Ts-y7Tbp-pgX1XE";
 
     function consultarDatos() {
-
-      let containerTabla = document.getElementById('containerTabla');
+      let containerTabla = document.getElementById("containerTabla");
       removeALLChilds(containerTabla);
 
-      var fechaInicio = document.getElementById('fechaInicio').value;
-      var fechaFin = document.getElementById('fechaFinal').value;      
-      
-      if (fechaInicio && fechaFin) {// Comprobar si se han seleccionado ambas fechas
+      var fechaInicio = document.getElementById("fechaInicio").value;
+      var fechaFin = document.getElementById("fechaFinal").value;
 
-          var fechaISOInicio = new Date(fechaInicio).toISOString().split('T')[0]; // Formato YYYY-MM-DD
-          var fechaISOFin = new Date(fechaFin).toISOString().split('T')[0]; // Formato YYYY-MM-DD         
-          crearLoader(); // se empieza a hacer la consulta
-          obtenerDatosPorRango(fechaISOInicio,fechaISOFin);
-
+      if (fechaInicio && fechaFin) {
+        var fechaISOInicio = new Date(fechaInicio).toISOString().split("T")[0];
+        var fechaISOFin = new Date(fechaFin).toISOString().split("T")[0];
+        crearLoader();
+        obtenerDatosPorRango(fechaISOInicio, fechaISOFin);
       } else {
-          alertSMS("Error: Ingrese ambas fechas inicial y final!");
+        alertSMS("Error: Ingrese ambas fechas inicial y final!");
       }
-      
     }
 
     async function obtenerDatosPorRango(fechaInicial, fechaFinal) {
       try {
-         const response = await fetch(`${SUPABASE_URL}/functions/v1/marcaciones_historico`, {
-          method: 'POST',
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-          }, 
-          body: JSON.stringify({
-            action: "filtrarFechasPorRango",
-            fechaInicial: fechaInicial,
-            fechaFinal: fechaFinal
-          })          
-        });
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/marcaciones_historico`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+            },
+            body: JSON.stringify({
+              action: "filtrarFechasPorRango",
+              fechaInicial: fechaInicial,
+              fechaFinal: fechaFinal,
+            }),
+          },
+        );
 
         const data = await response.json();
 
-        if (data.status === 'success') {
-          //console.log( data.data );
-          success(data.data);       
+        if (data.status === "success") {
+          success(data.data);
           eliminarLoader();
         } else {
           console.error(data.mensaje || "Error al obtener los datos por rango");
           eliminarLoader();
         }
       } catch (error) {
-        console.error('Error en obtenerDatosPorRango:', error);
+        console.error("Error en obtenerDatosPorRango:", error);
         eliminarLoader();
       }
     }
 
     function success(data) {
-      dataTable = data;  // Almacenar los datos en dataTable
-      currentPage = 1;   // Resetear a la primera página
-      updateTable();     // Mostrar la tabla con paginación
+      dataTable = data;
+      currentPage = 1;
+      updateTable();
     }
 
-   function updateTable() {
-    let containerTabla = document.getElementById('containerTabla');
-    removeALLChilds(containerTabla);
-    
-    let tabla = document.getElementById('plantillaTabla'); 
-    containerTabla.appendChild(tabla.content.cloneNode(true)); 
+    function updateTable() {
+      let containerTabla = document.getElementById("containerTabla");
+      removeALLChilds(containerTabla);
 
-    let mainTable = document.getElementById("mainTable");
-    let html = '';
+      let tabla = document.getElementById("plantillaTabla");
+      containerTabla.appendChild(tabla.content.cloneNode(true));
 
-    let start = (currentPage - 1) * recordsPerPage;
-    let end = start + recordsPerPage;
-    let paginatedData = dataTable.slice(start, end);
+      let mainTable = document.getElementById("mainTable");
+      let html = "";
 
-    paginatedData.forEach(elemento => {           
-      let URLimg = `'${elemento.foto}'`;
-      html += `<tr class="table table-striped">
+      let start = (currentPage - 1) * recordsPerPage;
+      let end = start + recordsPerPage;
+      let paginatedData = dataTable.slice(start, end);
+
+      paginatedData.forEach((elemento) => {
+        let URLimg = `'${elemento.foto}'`;
+        html += `<tr class="table table-striped">
                 <td>${elemento.nombre}</td>
                 <td>${elemento.fecha}</td>
                 <td>${elemento.tipo_registro}</td>
@@ -144,16 +185,15 @@
                   <a href="#" onclick="nsNomina.mostrarFoto(${URLimg})"><i class="bi bi-image"></i></a>            
                 </td>                 
                 <td style="text-align:center;">
-                  <a href="#" onclick="nsNomina.geolocalizar('https://www.google.com/maps?q=${elemento.ubicacion}')"><i class="bi bi-geo-alt-fill"></i></a>
+                  <a href="#" onclick="nsNomina.geolocalizar('https://maps.google.com/?q=${elemento.ubicacion}')"><i class="bi bi-geo-alt-fill"></i></a>
                 </td>
               </tr>`;
-    });
+      });
 
-    mainTable.innerHTML = html;
-    eliminarLoader();
-    createPagination();
-  }
-
+      mainTable.innerHTML = html;
+      eliminarLoader();
+      createPagination();
+    }
 
     function createPagination() {
       let pagination = document.getElementById("pagination");
@@ -161,15 +201,15 @@
       let pageCount = Math.ceil(dataTable.length / recordsPerPage);
 
       for (let i = 1; i <= pageCount; i++) {
-        let pageLink = document.createElement('button');
-        pageLink.classList.add('btn', 'btn-secondary', 'mx-1');
+        let pageLink = document.createElement("button");
+        pageLink.classList.add("btn", "btn-secondary", "mx-1");
         pageLink.textContent = i;
 
         if (i === currentPage) {
-          pageLink.classList.add('active');
+          pageLink.classList.add("active");
         }
 
-        pageLink.addEventListener('click', function() {
+        pageLink.addEventListener("click", function () {
           currentPage = i;
           updateTable();
         });
@@ -178,9 +218,69 @@
       }
     }
 
+    // =========================================================================
+    // 📊 NUEVA FUNCIÓN: Generación Dinámica de Reporte CSV para Excel
+    // =========================================================================
+    function generarCSV() {
+      if (dataTable.length === 0) {
+        alert("Primero debe consultar datos antes de descargar un reporte.");
+        return;
+      }
+
+      // Definición de las cabeceras del CSV según la captura
+      const cabeceras = [
+        "Nombre",
+        "Día",
+        "Tipo Registro",
+        "Hora",
+        "Ubicación",
+        "Foto",
+      ];
+
+      // Mapeamos los objetos descargados a arrays de strings estructurados
+      const filas = dataTable.map((item) => [
+        `"${item.nombre.replace(/"/g, '""')}"`, // Escapar comillas si el nombre las tiene
+        `"${item.fecha}"`,
+        `"${item.tipo_registro}"`,
+        `"${item.hora}"`,
+        `"${item.ubicacion}"`,
+        `"${item.foto}"`,
+      ]);
+
+      // Construcción del contenido del CSV.
+      // Se añade la marca 'sep=,' al inicio para forzar a Excel a abrirlo en columnas sin importar la región.
+      const contenidoCSV =
+        "sep=,\n" +
+        cabeceras.join(",") +
+        "\n" +
+        filas.map((e) => e.join(",")).join("\n");
+
+      // Codificación UTF-8 con BOM para que Excel lea los acentos y la "Ñ" perfectamente
+      const blob = new Blob(["\ufeff" + contenidoCSV], {
+        type: "text/csv;charset=utf-8;",
+      });
+
+      // Obtener un nombre dinámico para el archivo según el filtro actual
+      const fInicio = document.getElementById("fechaInicio").value || "reporte";
+      const fFinal = document.getElementById("fechaFinal").value || "archivo";
+      const nombreArchivo = `Horario_${fInicio}_al_${fFinal}.csv`;
+
+      // Crear enlace temporal en el DOM para forzar la descarga del archivo
+      const link = document.createElement("a");
+      if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", nombreArchivo);
+        link.style.visibility = "hidden";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    }
+
     function mostrarFoto(urlimg) {
-      event.preventDefault();        
-      let myModal = new bootstrap.Modal(document.getElementById('myModal'));         
+      event.preventDefault();
+      let myModal = new bootstrap.Modal(document.getElementById("myModal"));
       let mbody = document.getElementById("myModalbody");
       let modalcontainer = document.getElementById("modalcontainer");
       modalcontainer.classList.remove("modal-xl");
@@ -191,7 +291,7 @@
     function geolocalizar(coordenadas) {
       let iframe = `<iframe width="100%" height="600" frameborder="0" scrolling="no" marginheight="0" 
       marginwidth="0" src="${coordenadas}&output=embed"></iframe>`;
-      let myModal = new bootstrap.Modal(document.getElementById('myModal'));         
+      let myModal = new bootstrap.Modal(document.getElementById("myModal"));
       let mbody = document.getElementById("myModalbody");
       let modalcontainer = document.getElementById("modalcontainer");
       modalcontainer.classList.add("modal-xl");
@@ -205,60 +305,11 @@
       }
     }
 
-    async function generarCSV() {
-      var fechaInicio = document.getElementById('fechaInicio').value;
-      var fechaFin = document.getElementById('fechaFinal').value;
-      if (fechaInicio && fechaFin) {// Comprobar si se han seleccionado ambas fechas
-        
-        var fechaISOInicio = new Date(fechaInicio).toISOString().split('T')[0]; // Formato YYYY-MM-DD
-        var fechaISOFin = new Date(fechaFin).toISOString().split('T')[0]; // Formato YYYY-MM-DD         
-        crearLoader(); // se empieza a hacer la consulta
-
-        try {           
-
-          const response = await fetch(API_URL, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-            },
-            body: new URLSearchParams({
-              action: 'generarCSV',
-              fechaInicial: fechaISOInicio,
-              fechaFinal: fechaISOFin
-            })
-          });
-
-          const data = await response.json(); 
-
-          if (data.status === 'success' && data.downloadUrl) {
-            // Crear enlace temporal para descargar el archivo automáticamente
-            const link = document.createElement('a');
-            link.href = data.downloadUrl;
-            link.download = 'Informe_Nómina.csv'; // Nombre sugerido para la descarga
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            console.log("Descarga iniciada.");
-            eliminarLoader();
-          } else {
-            console.error(data.mensaje || "Error al generar CSV");
-             eliminarLoader();
-          }
-        } catch (error) {
-          console.error('Error en generarCSV:', error);
-          eliminarLoader();
-        }
-      } else {
-          alertSMS("Error: Ingrese ambas fechas inicial y final!");
-      }
-    }    
-
     return {
       consultarDatos: consultarDatos,
+      generarCSV: generarCSV, // Exportamos la nueva función al contexto público
       mostrarFoto: mostrarFoto,
       geolocalizar: geolocalizar,
-      generarCSV
     };
-
   })();
-  </script>
+</script>
