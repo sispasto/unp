@@ -144,8 +144,9 @@ function setNavbarCollapse() {
 document.addEventListener("DOMContentLoaded", async function () {
   /************Para forzar actualizacion de PWA**************/
   if ("serviceWorker" in navigator) {
+    // CAMBIO AQUÍ: Se eliminó '/unp' de la ruta del script y del scope
     navigator.serviceWorker
-      .register("/unp/service-worker.js", { scope: "/unp/" })
+      .register("./service-worker.js", { scope: "./" })
       .then((reg) => {
         reg.onupdatefound = () => {
           const newSW = reg.installing;
@@ -155,7 +156,7 @@ document.addEventListener("DOMContentLoaded", async function () {
               navigator.serviceWorker.controller
             ) {
               console.log("Nueva versión detectada, recargando...");
-              window.location.reload(); // Puedes reemplazar esto con una notificación
+              window.location.reload();
             }
           };
         };
